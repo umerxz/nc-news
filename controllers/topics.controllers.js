@@ -1,0 +1,15 @@
+const { fetchTopics, invalidPaths } = require("../models/topics.models")
+
+
+exports.getTopics=(req,res,next)=>{
+    fetchTopics()
+    .then((topics) => res.status(200).send(topics))
+    .catch((err) => {
+        next(err)
+    });
+}
+
+exports.invalidRoutes = (req, res, next) => {
+    invalidPaths()
+    .catch(next);
+  };
