@@ -1,8 +1,12 @@
 # Northcoders News API
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+To clone and run the project:
+    1. git clone <repo-url>
+    2. cd to the project folder
 
-
+To connect to the databases:
+    1. create 2 separate env files, for test and development.
+    2. In each file use PGDATABASE=database_name, replacing the database_name with the name of the database to connect to.
 
 --- 
 
