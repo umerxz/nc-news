@@ -3,7 +3,7 @@ const seed = require("../db/seeds/seed");
 const test_data = require("../db/data/test-data");
 const request = require("supertest");
 const app = require("../app");
-
+const endpoints = require('../endpoints.json')
 beforeAll(() => seed(test_data));
 afterAll(() => db.end());
 
@@ -30,4 +30,14 @@ describe("Get/api/topics", () => {
             expect(res.body.msg).toBe("Not Found");
         });
     });
-}) 
+})
+describe("GET /api",()=>{
+    test("responds with an object of all available API endpoints as objects",()=>{
+        return request(app)
+        .get('/api')
+        .then((response)=>{
+            expect(response.body.endpoints).toEqual(endpoints)
+            expect(response.body.endpoints).toMatchObject(endpoints)
+        })
+    })
+})
