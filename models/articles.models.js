@@ -31,3 +31,25 @@ exports.fetchArticles = (sort_by='created_at',order='desc') => {
         return results.rows
     })
 }
+exports.checkArticleExists = (id) => {
+    return db.query(
+        `SELECT * FROM articles WHERE article_id = $1`, [id]
+    )
+    .then((results)=>{
+        if(!results.rows.length){
+            return Promise.reject({ status: 404, msg: "Not Found" })
+        }
+    })
+}
+exports.fetchArticleCommentsById = (id) => {
+    return db.query(
+        `select comments.*
+        from articles
+        join comments on comments.article_id = articles.article_id
+        where articles.article_id=$1
+        order by comments.created_at desc`,[id]
+    )
+    .then((results) => {
+        return (results.rows)
+    });
+}

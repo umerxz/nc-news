@@ -41,5 +41,29 @@
         "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
       }
     }
+  },
+  "GET /api/articles/:article_id/comments":{
+    "description": "serves with an array of comments for the article id provided",
+    "queries": [],
+    "exampleResponse":{
+      "comments":[
+        {
+          "comment_id": 10,
+          "body": "git push origin master",
+          "votes": 0,
+          "author": "icellusedkars",
+          "article_id": 3,
+          "created_at": 1592641440000
+        },
+        {
+          "comment_id": 11,
+          "body": "Ambidextrous marsupial",
+          "votes": 0,
+          "author": "icellusedkars",
+          "article_id": 3,
+          "created_at": 1600560600000
+        }
+      ]
+    }
   }
 }
