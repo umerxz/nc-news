@@ -77,3 +77,35 @@ describe("GET /api/articles/:article_id",()=>{
         });
     });
 })
+describe("GET /api/articles",()=>{
+    test("responds with status 200 and an articles array of article objects including total articles' comments, excluding body",()=>{
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.articles).toHaveLength(13)
+            expect(body.articles).toBeSortedBy("created_at",{descending: true})
+            body.articles.map((article)=>{
+                expect(article).toMatchObject({
+                    article_id: expect.any(Number),
+                    title: expect.any(String),
+                    topic: expect.any(String),
+                    author: expect.any(String),
+                    votes: expect.any(Number),
+                    created_at: expect.any(String),
+                    comment_count: expect.any(Number),
+                })
+            })
+        })
+    })
+})
+describe("GET * (Invalid Routes)",()=>{
+    test("responds with a status of 404 and Not found error msg if an invalid route is provided", () => {
+        return request(app)
+        .get("/api/notAnArticleRoute")
+        .expect(404)
+        .then((res) => {
+            expect(res.body.msg).toBe("Not Found");
+        });
+    });
+})
