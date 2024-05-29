@@ -5,6 +5,7 @@ const request = require("supertest");
 const app = require("../app");
 
 beforeAll(() => seed(testData));
+const endpoints = require('../endpoints.json')
 afterAll(() => db.end());
 
 describe("Get/api/topics", () => {
@@ -32,4 +33,14 @@ describe("* - Invalid Routes",()=>{
             expect(res.body.msg).toBe("Not Found");
         });
     });
+})
+describe("GET /api",()=>{
+    test("responds with an object of all available API endpoints as objects",()=>{
+        return request(app)
+        .get('/api')
+        .then((response)=>{
+            expect(response.body.endpoints).toEqual(endpoints)
+            expect(response.body.endpoints).toMatchObject(endpoints)
+        })
+    })
 })
