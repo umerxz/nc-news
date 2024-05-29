@@ -109,3 +109,41 @@ describe("GET * (Invalid Routes)",()=>{
         });
     });
 })
+describe("GET /api/articles/:article_id/comments",()=>{
+    test("responds with 200 and an array of comments for the given article_id with each comments details, provided the id should be valid, existing and having comments",()=>{
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.comments).toHaveLength(11)
+            expect(body.comments).toBeSortedBy("created_at",{descending: true})
+            body.comments.map((comment)=>{
+                expect(comment).toMatchObject({
+                    article_id: expect.any(Number),
+                    comment_id: expect.any(Number),
+                    body: expect.any(String),
+                    author: expect.any(String),
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                })
+            })
+        })
+    })
+    test("responds with 200 and an empty array, provided the id should be valid, existing but having no comments",()=>{
+        return request(app)
+        .get('/api/articles/2/comments')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.comments).toHaveLength(0)
+            expect(body.comments).toEqual([])
+        })
+    })
+    test("responds with 404 and error msg Not Found if the article does not exist",()=>{
+        return request(app)
+        .get('/api/articles/1000/comments')
+        .expect(404)
+        .then((res) => {
+            expect(res.body.msg).toBe("Not Found");
+        });
+    })
+})
