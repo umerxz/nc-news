@@ -41,3 +41,36 @@ describe("GET /api",()=>{
         })
     })
 })
+describe("GET /api/articles/:article_id",()=>{
+    test("responds with status 200 an article object of id provided",()=>{
+        return request(app)
+        .get('/api/articles/1')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.article.author).toBe('butter_bridge')
+            expect(body.article.title).toBe('Living in the shadow of a great man')
+            expect(body.article.article_id).toBe(1)
+            expect(body.article.body).toBe('I find this existence challenging')
+            expect(body.article.topic).toBe('mitch')
+            expect(body.article.created_at).toBe('2020-07-09T20:11:00.000Z')
+            expect(body.article.votes).toBe(100)
+            expect(body.article.article_img_url).toBe('https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700')
+        })
+    })
+    test('responds with status 404 and error message when given a valid but non-existent id', () => {
+        return request(app)
+        .get('/api/articles/9999999')
+        .expect(404)
+        .then((response) => {
+            expect(response.body.msg).toBe('Not Found');
+        });
+    });
+    test('responds with status 400 sends an error message Bad Request when given an invalid id', () => {
+        return request(app)
+        .get('/api/articles/not-a-article')
+        .expect(400)
+        .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
+        });
+    });
+})
