@@ -77,7 +77,7 @@ describe("GET /api/articles/:article_id",()=>{
     });
 })
 describe("GET /api/articles",()=>{
-    test("responds with status 200 and an articles array of article objects including total articles' comments, excluding body, sorted by date in descending order",()=>{
+    test("responds with status 200 and an articles array of article objects including total articles' comments, excluding body, sorted by date in descending order and without comment_count",()=>{
         return request(app)
         .get('/api/articles')
         .expect(200)
@@ -94,6 +94,36 @@ describe("GET /api/articles",()=>{
                     created_at: expect.any(String),
                     comment_count: expect.any(Number),
                 })
+            })
+        })
+    })
+    test("responds with status 200 an article object of id provided with comment_count",()=>{
+        return request(app)
+        .get('/api/articles/1')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.article).toHaveProperty('comment_count')
+            expect(body.article).toEqual(expect.objectContaining({
+                article_id: expect.any(Number),
+                title: expect.any(String),
+                topic: expect.any(String),
+                author: expect.any(String),
+                body: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                article_img_url: expect.any(String),
+                comment_count: expect.any(Number)
+            }))
+            expect(body.article).toEqual({
+                article_id: 1,
+                title: 'Living in the shadow of a great man',
+                topic: 'mitch',
+                author: 'butter_bridge',
+                body: 'I find this existence challenging',
+                created_at: '2020-07-09T20:11:00.000Z',
+                votes: 100,
+                article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+                comment_count: 11
             })
         })
     })
