@@ -1,4 +1,5 @@
 const { use } = require("../app");
+const { updateArticleById } = require("../models/articles.models");
 const { fetchArticleById, fetchArticles, fetchArticleCommentsById, checkArticleExists, insertArticleCommentById } = require("../models/articles.models");
 const { checkUsersExists } = require("../models/users.models");
 
@@ -39,4 +40,12 @@ exports.postArticleCommentById = (req, res, next) => {
         res.status(201).send({comment:newComment})
     })
     .catch(next)
+}
+exports.patchArticleById = (req, res, next) =>{
+    const newVotes =  req.body.inc_votes
+    const article_id = req.params.article_id
+    return updateArticleById(article_id,newVotes)
+    .then((article) => {
+        res.status(200).send({article})
+    }).catch(next);
 }
