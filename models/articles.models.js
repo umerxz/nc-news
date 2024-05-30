@@ -14,14 +14,18 @@ exports.fetchArticleById = (id) =>{
         return result.rows[0]
     })
 }
-exports.fetchArticles = (sort_by='created_at',order='DESC') => {
+exports.fetchArticles = (topic,sort_by='created_at',order='DESC') => {
+    const queryValues = []
     let query = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.votes, articles.created_at, COUNT(comments.article_id)::INT AS comment_count FROM articles 
-    LEFT JOIN comments ON comments.article_id = articles.article_id
-    GROUP BY articles.article_id`
+    LEFT JOIN comments ON comments.article_id = articles.article_id`
     
-    query += ` ORDER BY articles.${sort_by} ${order};`
+    if(topic){
+        queryValues.push(topic)
+        query += ` WHERE topic = $1`
+    }
+    query += ` GROUP BY articles.article_id ORDER BY articles.${sort_by} ${order};`
     
-    return db.query(query)
+    return db.query(query,queryValues)
     .then((results)=>{
         return results.rows
     })

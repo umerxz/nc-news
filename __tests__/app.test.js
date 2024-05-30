@@ -327,3 +327,24 @@ describe("GET * (Invalid Users Routes)",()=>{
         });
     });
 })
+describe("GET /api/articles (topic query)",()=>{
+    test("responds with status 200 and an array of articles objects filtered by the topics if given, else returns all articles",()=>{
+        return request(app)
+        .get('/api/articles?topic=mitch')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.articles).toHaveLength(12)
+            body.articles.map((article)=>{
+                expect(article).toMatchObject({
+                    article_id: expect.any(Number),
+                    title: expect.any(String),
+                    topic: expect.any(String),
+                    author: expect.any(String),
+                    votes: expect.any(Number),
+                    created_at: expect.any(String),
+                    comment_count: expect.any(Number)
+                })
+            })
+        })
+    })
+})

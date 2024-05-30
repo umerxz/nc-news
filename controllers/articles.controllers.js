@@ -1,7 +1,5 @@
-const { use } = require("../app");
 const { updateArticleById } = require("../models/articles.models");
 const { fetchArticleById, fetchArticles, fetchArticleCommentsById, checkArticleExists, insertArticleCommentById } = require("../models/articles.models");
-const { checkUsersExists } = require("../models/users.models");
 
 exports.getArticleById = (req, res, next) => {
     fetchArticleById(req.params.article_id)
@@ -11,7 +9,8 @@ exports.getArticleById = (req, res, next) => {
     .catch(next);
 }
 exports.getArticles = (req, res, next) => {
-    fetchArticles()
+    const topic = req.query.topic
+    fetchArticles(topic)
     .then((articles) => {
         res.status(200).send({articles})
     }).catch(next);
