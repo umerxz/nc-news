@@ -166,12 +166,13 @@ describe("POST /api/articles/:article_id/comments",()=>{
         .send(newComment)
         .expect(201)
         .then(({body})=>{
+            expect(body.comment.comment_id).toBe(19)
+            expect(body.comment.article_id).toBe(2)
+            expect(body.comment.author).toBe('lurker')
+            expect(body.comment.votes).toBe(0)
+            expect(body.comment.body).toBe('I cant code when i am sleepy.')
             expect(body.comment).toMatchObject({
-                comment_id: expect.any(Number),
-                article_id: expect.any(Number),
-                author: expect.any(String),
-                body: expect.any(String),
-                votes: expect.any(Number)
+                created_at: expect.any(String)
             })
         })
     })
