@@ -147,3 +147,68 @@ describe("GET /api/articles/:article_id/comments",()=>{
         });
     })
 })
+describe("POST /api/articles/:article_id/comments",()=>{
+    test("responds with status 201, posts the new comment and sends the new comment back to the client",()=>{
+        const newComment = {
+            username: "lurker",
+            body: "I cant code when i am sleepy."
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(newComment)
+        .expect(201)
+        .then(({body})=>{
+            expect(body.comment).toMatchObject({
+                comment_id: expect.any(Number),
+                article_id: expect.any(Number),
+                author: expect.any(String),
+                body: expect.any(String),
+                votes: expect.any(Number)
+            })
+        })
+    })
+    test("responds with status 404 and error message Not Found when username passed doesnt exist",()=>{
+        const newComment = {
+            username: "umerxz",
+            body: "I cant code when i am sleepy."
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(newComment)
+        .expect(404)
+        .then((res) => {
+            expect(res.body.msg).toBe("Not Found");
+        });
+    })
+    test("responds with status 404 and error message Not Found when article id passed doesnt exist",()=>{
+        const newComment = {
+            username: "lurker",
+            body: "I cant code when i am sleepy."
+        }
+        return request(app)
+        .post('/api/articles/1000/comments')
+        .send(newComment)
+        .expect(404)
+        .then((res) => {
+            expect(res.body.msg).toBe("Not Found");
+        });
+    })
+    test('responds with 400 and Bad Request error message when a required field is missing', () => {
+        return request(app)
+        .post('/api/articles/1/comments')
+        .send({ username: "lurker" })
+        .expect(400)
+        .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
+        });
+    })
+    test('responds with 400 and Bad Request error message when an invalid id is given', () => {
+        return request(app)
+        .post('/api/articles/IdHere/comments')
+        .send({ username: "lurker", body: "I cant code when i am sleepy." })
+        .expect(400)
+        .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
+        });
+    })
+})
