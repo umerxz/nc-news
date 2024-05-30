@@ -1,4 +1,6 @@
-const { fetchArticleById, fetchArticles, fetchArticleCommentsById, checkArticleExists } = require("../models/articles.models")
+const { use } = require("../app");
+const { fetchArticleById, fetchArticles, fetchArticleCommentsById, checkArticleExists, insertArticleCommentById } = require("../models/articles.models");
+const { checkUsersExists } = require("../models/users.models");
 
 exports.getArticleById = (req, res, next) => {
     fetchArticleById(req.params.article_id)
@@ -22,6 +24,19 @@ exports.getArticleCommentsById = (req, res, next) => {
     Promise.all(promises)
     .then((resolvedPromises)=>{
         res.status(200).send({comments:resolvedPromises[0]})
+    })
+    .catch(next)
+}
+exports.postArticleCommentById = (req, res, next) => {
+    const article_id=req.params.article_id
+    const {username,body}=req.body
+
+    Promise.all([checkArticleExists(article_id),checkUsersExists(username)])
+    .then((resolvedPromises)=>{
+        return insertArticleCommentById(article_id,username,body)
+    })
+    .then((newComment)=>{
+        res.status(201).send({comment:newComment})
     })
     .catch(next)
 }

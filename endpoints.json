@@ -65,5 +65,23 @@
         }
       ]
     }
+  },
+  "POST /api/articles/:article_id/comments":{
+    "description": "serves with an object of new posted comment",
+    "queries": [],
+    "requestBody": {
+      "username":"lurker",
+      "body":"I cant code when i am sleepy"
+    },
+    "exampleResponse":{
+      "comment": {
+        "comment_id": 19,
+        "body": "I cant code when i am sleepy.",
+        "article_id": 2,
+        "author": "lurker",
+        "votes": 0,
+        "created_at": "2024-05-29T17:53:20.409Z"
+      }
+    }
   }
 }

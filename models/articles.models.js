@@ -1,5 +1,5 @@
 const db = require('../db/connection')
-
+const format = require('pg-format')
 exports.fetchArticleById = (id) =>{
     return db.query(
         `SELECT * FROM articles WHERE article_id = $1;`,[id]
@@ -52,4 +52,19 @@ exports.fetchArticleCommentsById = (id) => {
     .then((results) => {
         return (results.rows)
     });
+}
+exports.insertArticleCommentById = (id,username,body) => {
+    if(!id || !username || !body){
+        return Promise.reject({ status:400, msg: "Bad Request"})
+    }
+    const formattedComment = [[Number(id),username,body]]
+    return db.query(
+        format(
+            `INSERT INTO comments (article_id,author,body) VALUES %L
+            RETURNING*;`,formattedComment
+        )
+    )
+    .then((results)=>{
+        return results.rows[0]
+    })
 }
