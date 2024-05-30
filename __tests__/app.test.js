@@ -152,6 +152,8 @@ describe("GET /api/articles/:article_id/comments",()=>{
         .expect(400)
         .then((res) => {
             expect(res.body.msg).toBe("Bad Request");
+        })
+    })
 })
 describe("POST /api/articles/:article_id/comments",()=>{
     test("responds with status 201, posts the new comment and sends the new comment back to the client",()=>{
@@ -212,6 +214,61 @@ describe("POST /api/articles/:article_id/comments",()=>{
         return request(app)
         .post('/api/articles/IdHere/comments')
         .send({ username: "lurker", body: "I cant code when i am sleepy." })
+        .expect(400)
+        .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
+        });
+    })
+})
+describe("PATCH /api/articles/:article_id",()=>{
+    test("updates the article, responds with 200 status and the updated Article",()=>{
+        return request(app)
+        .patch('/api/articles/1')
+        .send({inc_votes: -100})
+        .expect(200)
+        .then(({body}) => {
+            expect(body.article).toMatchObject({
+                article_id: expect.any(Number),
+                title: expect.any(String),
+                topic: expect.any(String),
+                author: expect.any(String),
+                body: expect.any(String),
+                votes: expect.any(Number),
+                article_img_url: expect.any(String)
+            })
+        });
+    })
+    test('responds with status 400 and error message Bad Request when body passed has wrong data type', () => {
+        return request(app)
+        .patch('/api/articles/2')
+        .send({ inc_votes: 'votes' })
+        .expect(400)
+        .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
+        });
+    })
+    test('responds with status 400 and error message Bad Request when fields/body are missing/malformed', () => {
+        return request(app)
+        .patch('/api/articles/2')
+        .send({ })
+        .expect(400)
+        .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
+        });
+    })
+    test('responds with status 404 and error message Not Found when id passed does not exist', () => {
+        return request(app)
+        .patch('/api/articles/1000')
+        .send({ inc_votes: 1 })
+        .expect(404)
+        .then((response) => {
+            expect(response.body.msg).toBe('Not Found');
+        });
+    })
+    test('responds with status 400 and error message Bad Request when article id passed has invalid type', () => {
+        return request(app)
+        .patch('/api/articles/IamId')
+        .send({ inc_votes: 1 })
         .expect(400)
         .then((response) => {
             expect(response.body.msg).toBe('Bad Request');

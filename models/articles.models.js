@@ -63,3 +63,14 @@ exports.insertArticleCommentById = (id,username,body) => {
         return results.rows[0]
     })
 }
+exports.updateArticleById = (article_id,newVotes) => {
+    return db.query(
+        `UPDATE articles SET votes = votes+$1 WHERE article_id = $2 RETURNING *;`,[newVotes,article_id]
+    )
+    .then(({rows})=>{
+        if(!rows.length){
+            return Promise.reject({ status:404, msg:"Not Found" })
+        }
+        return rows[0]
+    })
+}
