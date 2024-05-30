@@ -299,3 +299,31 @@ describe("DELETE /api/comments/:comment_id",()=>{
         })
     })
 })
+describe("GET /api/users",()=>{
+    test("responds with status 200 and an array of objects of all users",()=>{
+        return request(app)
+        .get('/api/users')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.users).toHaveLength(testData.userData.length)
+            expect(body.users).toEqual(testData.userData)
+            body.users.map((user) => {
+                expect(user).toMatchObject({
+                    username: expect.any(String),
+                    name: expect.any(String),
+                    avatar_url: expect.any(String),
+                });
+            });
+        })
+    })
+})
+describe("GET * (Invalid Users Routes)",()=>{
+    test("responds with a status of 404 and Not found error msg if an invalid route is provided", () => {
+        return request(app)
+        .get("/api/notUsersRoute")
+        .expect(404)
+        .then((res) => {
+            expect(res.body.msg).toBe("Not Found");
+        });
+    });
+})
