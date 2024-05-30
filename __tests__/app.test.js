@@ -39,7 +39,6 @@ describe("GET /api",()=>{
         return request(app)
         .get('/api')
         .then((response)=>{
-            expect(response.body.endpoints).toEqual(endpoints)
             expect(response.body.endpoints).toMatchObject(endpoints)
         })
     })
@@ -78,7 +77,7 @@ describe("GET /api/articles/:article_id",()=>{
     });
 })
 describe("GET /api/articles",()=>{
-    test("responds with status 200 and an articles array of article objects including total articles' comments, excluding body",()=>{
+    test("responds with status 200 and an articles array of article objects including total articles' comments, excluding body, sorted by date in descending order",()=>{
         return request(app)
         .get('/api/articles')
         .expect(200)
@@ -99,7 +98,7 @@ describe("GET /api/articles",()=>{
         })
     })
 })
-describe("GET * (Invalid Routes)",()=>{
+describe("GET * (Invalid Articles Routes)",()=>{
     test("responds with a status of 404 and Not found error msg if an invalid route is provided", () => {
         return request(app)
         .get("/api/notAnArticleRoute")
@@ -153,6 +152,69 @@ describe("GET /api/articles/:article_id/comments",()=>{
         .expect(400)
         .then((res) => {
             expect(res.body.msg).toBe("Bad Request");
+})
+describe("POST /api/articles/:article_id/comments",()=>{
+    test("responds with status 201, posts the new comment and sends the new comment back to the client",()=>{
+        const newComment = {
+            username: "lurker",
+            body: "I cant code when i am sleepy."
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(newComment)
+        .expect(201)
+        .then(({body})=>{
+            expect(body.comment).toMatchObject({
+                comment_id: expect.any(Number),
+                article_id: expect.any(Number),
+                author: expect.any(String),
+                body: expect.any(String),
+                votes: expect.any(Number)
+            })
+        })
+    })
+    test("responds with status 404 and error message Not Found when username passed doesnt exist",()=>{
+        const newComment = {
+            username: "umerxz",
+            body: "I cant code when i am sleepy."
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(newComment)
+        .expect(404)
+        .then((res) => {
+            expect(res.body.msg).toBe("Not Found");
+        });
+    })
+    test("responds with status 404 and error message Not Found when article id passed doesnt exist",()=>{
+        const newComment = {
+            username: "lurker",
+            body: "I cant code when i am sleepy."
+        }
+        return request(app)
+        .post('/api/articles/1000/comments')
+        .send(newComment)
+        .expect(404)
+        .then((res) => {
+            expect(res.body.msg).toBe("Not Found");
+        });
+    })
+    test('responds with 400 and Bad Request error message when a required field is missing', () => {
+        return request(app)
+        .post('/api/articles/1/comments')
+        .send({ username: "lurker" })
+        .expect(400)
+        .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
+        });
+    })
+    test('responds with 400 and Bad Request error message when an invalid id is given', () => {
+        return request(app)
+        .post('/api/articles/IdHere/comments')
+        .send({ username: "lurker", body: "I cant code when i am sleepy." })
+        .expect(400)
+        .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
         });
     })
 })

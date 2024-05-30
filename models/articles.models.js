@@ -1,5 +1,5 @@
 const db = require('../db/connection')
-
+const format = require('pg-format')
 exports.fetchArticleById = (id) =>{
     return db.query(
         `SELECT * FROM articles WHERE article_id = $1;`,[id]
@@ -14,17 +14,12 @@ exports.fetchArticleById = (id) =>{
         return result.rows[0]
     })
 }
-exports.fetchArticles = (sort_by='created_at',order='desc') => {
+exports.fetchArticles = (sort_by='created_at',order='DESC') => {
     let query = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.votes, articles.created_at, COUNT(comments.article_id)::INT AS comment_count FROM articles 
     LEFT JOIN comments ON comments.article_id = articles.article_id
     GROUP BY articles.article_id`
     
-    const validSortBy = ['created_at']
-    if(!validSortBy.includes(sort_by) && sort_by){
-        return Promise.reject({status: 400, msg: 'Bad Request'})
-    }
-    
-    query += ` ORDER BY articles.${sort_by} ${order.toUpperCase()};`
+    query += ` ORDER BY articles.${sort_by} ${order};`
     
     return db.query(query)
     .then((results)=>{
@@ -52,4 +47,19 @@ exports.fetchArticleCommentsById = (id) => {
     .then((results) => {
         return (results.rows)
     });
+}
+exports.insertArticleCommentById = (id,username,body) => {
+    if(!id || !username || !body){
+        return Promise.reject({ status:400, msg: "Bad Request"})
+    }
+    const formattedComment = [[Number(id),username,body]]
+    return db.query(
+        format(
+            `INSERT INTO comments (article_id,author,body) VALUES %L
+            RETURNING*;`,formattedComment
+        )
+    )
+    .then((results)=>{
+        return results.rows[0]
+    })
 }
