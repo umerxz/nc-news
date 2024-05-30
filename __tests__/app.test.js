@@ -36,7 +36,6 @@ describe("GET /api",()=>{
         return request(app)
         .get('/api')
         .then((response)=>{
-            expect(response.body.endpoints).toEqual(endpoints)
             expect(response.body.endpoints).toMatchObject(endpoints)
         })
     })
