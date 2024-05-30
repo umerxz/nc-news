@@ -2,7 +2,10 @@ const db = require('../db/connection')
 const format = require('pg-format')
 exports.fetchArticleById = (id) =>{
     return db.query(
-        `SELECT * FROM articles WHERE article_id = $1;`,[id]
+        `SELECT articles.*, COUNT(comments.article_id)::INT AS comment_count FROM articles 
+        LEFT JOIN comments ON comments.article_id = articles.article_id
+        WHERE articles.article_id = $1
+        GROUP BY articles.article_id`,[id]
     )
     .then((result)=>{
         if(result.rows.length===0){
