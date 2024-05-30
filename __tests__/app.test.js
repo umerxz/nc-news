@@ -118,6 +118,7 @@ describe("GET /api/articles/:article_id/comments",()=>{
             expect(body.comments).toHaveLength(11)
             expect(body.comments).toBeSortedBy("created_at",{descending: true})
             body.comments.map((comment)=>{
+                expect(comment.article_id).toBe(1)
                 expect(comment).toMatchObject({
                     article_id: expect.any(Number),
                     comment_id: expect.any(Number),
@@ -144,6 +145,14 @@ describe("GET /api/articles/:article_id/comments",()=>{
         .expect(404)
         .then((res) => {
             expect(res.body.msg).toBe("Not Found");
+        });
+    })
+    test("responds with 400 and error msg Bad Request if the article id type is invalid",()=>{
+        return request(app)
+        .get('/api/articles/IamId/comments')
+        .expect(400)
+        .then((res) => {
+            expect(res.body.msg).toBe("Bad Request");
         });
     })
 })
