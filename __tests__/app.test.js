@@ -276,3 +276,26 @@ describe("PATCH /api/articles/:article_id",()=>{
         });
     })
 })
+describe("DELETE /api/comments/:comment_id",()=>{
+    test("responds with status 204 and sends an empty response back after deleting the comment",()=>{
+        return request(app)
+        .delete('/api/comments/2')
+        .expect(204)
+    })
+    test("responds with status 404 and error message Not Found when an id does not exist",()=>{
+        return request(app)
+        .delete('/api/comments/999999')
+        .expect(404)
+        .then(({body})=>{
+            expect(body.msg).toBe("Not Found");
+        })
+    })
+    test("responds with status 400 and error message Bad Request when an invalid id given",()=>{
+        return request(app)
+        .delete('/api/comments/i_am_id')
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad Request");
+        })
+    })
+})
