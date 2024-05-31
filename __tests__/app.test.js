@@ -415,3 +415,33 @@ describe("GET /api/articles (sorting queries)",()=>{
         })
     })
 })
+describe("GET /api/users/:username",()=>{
+    test("reponds with status 200 and an user object matching with the username passed",()=>{
+        return request(app)
+        .get('/api/users/lurker')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.user).toEqual({
+                username: 'lurker',
+                name: 'do_nothing',
+                avatar_url: 'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png'
+            })
+        })
+    })
+    test("responds with status 404 and error msg Not Found when username does not exist",()=>{
+        return request(app)
+        .get('/api/users/umerxz')
+        .expect(404)
+        .then(({body})=>{
+            expect(body.msg).toBe("Not Found")
+        })
+    })
+    test("responds with status 400 and error msg Bad Request when wrong type/wrong username format/wrong symbols passed for username",()=>{
+        return request(app)
+        .get('/api/users/1-as_d')
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad Request")
+        })
+    })
+})
