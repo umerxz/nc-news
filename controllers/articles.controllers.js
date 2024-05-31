@@ -18,10 +18,9 @@ exports.getArticles = (req, res, next) => {
     .catch(next);
 }
 exports.getArticleCommentsById = (req, res, next) => {
-    const article_id=req.params.article_id
-    const promises = [fetchArticleCommentsById(article_id)]
+    const promises = [fetchArticleCommentsById(req.params,req.query)]
     
-    promises.push(checkArticleExists(article_id))
+    promises.push(checkArticleExists(req.params,req.query))
     
     Promise.all(promises)
     .then((resolvedPromises)=>{
