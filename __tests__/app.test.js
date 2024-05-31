@@ -144,7 +144,7 @@ describe("GET /api/articles/:article_id/comments",()=>{
         .get('/api/articles/1/comments')
         .expect(200)
         .then(({body})=>{
-            expect(body.comments).toHaveLength(11)
+            expect(body.comments).toHaveLength(10)
             expect(body.comments).toBeSortedBy("created_at",{descending: true})
             body.comments.map((comment)=>{
                 expect(comment.article_id).toBe(1)
@@ -587,13 +587,12 @@ describe("GET /api/articles (pagination)",()=>{
         })
     })
 })
-describe.only("GET /api/articles/:article_id/comments (pagination)",()=>{
+describe("GET /api/articles/:article_id/comments (pagination)",()=>{
     test("responds with status 200 and an array of that articles comments objects, with 2 articles on page 2",()=>{
         return request(app)
         .get('/api/articles/1/comments')
         .expect(200)
         .then(({body})=>{
-            console.log(body)
             expect(body.comments).toBeSortedBy('created_at',{descending:true})
             body.comments.map((comment)=>{
                 expect(comment.article_id).toBe(1)
@@ -638,5 +637,40 @@ describe.only("GET /api/articles/:article_id/comments (pagination)",()=>{
         .then(({body})=>{
             expect(body.msg).toBe("Not Found")
         })
+    })
+})
+describe("POST /api/topics",()=>{
+    test("responds with status 201, posts the new topic and sends the new topic back to the client",()=>{
+        const newTopics = {
+            slug: "topic name here",
+            description: "description here"
+        }
+        return request(app)
+        .post('/api/topics')
+        .send(newTopics)
+        .expect(201)
+        .then(({body})=>{
+            expect(body.topic.slug).toBe("topic name here")
+            expect(body.topic.description).toBe("description here")
+        })
+    })
+    test('responds with 400 and Bad Request error message when a required field Primary Key is missing', () => {
+        return request(app)
+        .post('/api/topics')
+        .send({ description: "description here" })
+        .expect(400)
+        .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
+        });
+    })
+    test('responds with 400 and Bad Request error message when an wrong type is given', () => {
+        return request(app)
+        .post('/api/topics')
+        .send({ slug: 1231, description: 23 })
+        .expect(400)
+        .then((response) => {
+            console.log(response.body)
+            expect(response.body.msg).toBe('Bad Request');
+        });
     })
 })
