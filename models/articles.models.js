@@ -17,7 +17,7 @@ exports.fetchArticleById = (id) =>{
         return result.rows[0]
     })
 }
-exports.fetchArticles = (topic,sort_by='created_at',order='DESC') => {
+exports.fetchArticles = ({topic,sort_by='created_at',order='DESC'}) => {
     const queryValues = []
     let query = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.votes, articles.created_at, COUNT(comments.article_id)::INT AS comment_count FROM articles 
     LEFT JOIN comments ON comments.article_id = articles.article_id`
@@ -26,6 +26,16 @@ exports.fetchArticles = (topic,sort_by='created_at',order='DESC') => {
         queryValues.push(topic)
         query += ` WHERE topic = $1`
     }
+
+    if(!["ASC","DESC"].includes(order.toUpperCase())){
+        return Promise.reject({status: 400, msg: 'Bad Request'})
+    }
+
+    const validSortBy = ['created_at',"author", "topic"]
+    if(!validSortBy.includes(sort_by) && sort_by){
+        return Promise.reject({status: 400, msg: 'Bad Request'})
+    }
+
     query += ` GROUP BY articles.article_id ORDER BY articles.${sort_by} ${order};`
     
     return db.query(query,queryValues)

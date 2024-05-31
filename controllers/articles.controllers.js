@@ -9,8 +9,7 @@ exports.getArticleById = (req, res, next) => {
     .catch(next);
 }
 exports.getArticles = (req, res, next) => {
-    const topic = req.query.topic
-    fetchArticles(topic)
+    fetchArticles(req.query)
     .then((articles) => {
         res.status(200).send({articles})
     }).catch(next);

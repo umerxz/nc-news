@@ -378,3 +378,40 @@ describe("GET /api/articles (topic query)",()=>{
         })
     })
 })
+describe("GET /api/articles (sorting queries)",()=>{
+    test("responds with status 200 and an array of articles objects sorted by article author in ascending order",()=>{
+        return request(app)
+        .get('/api/articles?sort_by=author&order=asc')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.articles).toHaveLength(13)
+            expect(body.articles).toBeSortedBy('author')
+        })
+    })
+    test("responds with status 200 and an array of articles objects sorted by default sort by created_at in ascending order when no sort by provided",()=>{
+        return request(app)
+        .get('/api/articles?order=asc')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.articles).toHaveLength(13)
+            expect(body.articles).toBeSortedBy('created_at')
+        })
+    })
+    test("responds with status 400 and error msg Bad Request if a query search is not allowed",()=>{
+        return request(app)
+        .get('/api/articles?sort_by=title&order=none')
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad Request")
+        })
+    })
+    test("responds with status 200 and an array of articles objects sorted by their default values created_at in descending order, if query search given ",()=>{
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.articles).toHaveLength(13)
+            expect(body.articles).toBeSortedBy('created_at',{descending:true})
+        })
+    })
+})
