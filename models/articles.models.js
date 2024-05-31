@@ -17,14 +17,14 @@ exports.fetchArticleById = (id) =>{
         return result.rows[0]
     })
 }
-exports.fetchArticles = ({topic,sort_by='created_at',order='DESC'}) => {
+exports.fetchArticles = ({topic,sort_by='created_at',order='DESC',limit=10,p}) => {
     const queryValues = []
     let query = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.votes, articles.created_at, COUNT(comments.article_id)::INT AS comment_count FROM articles 
     LEFT JOIN comments ON comments.article_id = articles.article_id`
     
     if(topic){
         queryValues.push(topic)
-        query += ` WHERE topic = $1`
+        query += ` WHERE topic = $${queryValues.length}`
     }
 
     if(!["ASC","DESC"].includes(order.toUpperCase())){
@@ -36,8 +36,20 @@ exports.fetchArticles = ({topic,sort_by='created_at',order='DESC'}) => {
         return Promise.reject({status: 400, msg: 'Bad Request'})
     }
 
-    query += ` GROUP BY articles.article_id ORDER BY articles.${sort_by} ${order};`
-    
+    query += ` GROUP BY articles.article_id ORDER BY articles.${sort_by} ${order}`
+    if(limit){
+        limit=Number(limit)
+        queryValues.push(limit)
+        query += ` LIMIT $${queryValues.length}`
+    }
+    const offset = (p-1)*limit
+    if(p){
+        p=Number(p)
+        queryValues.push(offset)
+        query += ` OFFSET $${(queryValues.length)}`
+    }
+
+    query += ';'
     return db.query(query,queryValues)
     .then((results)=>{
         return results.rows
