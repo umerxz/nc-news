@@ -445,3 +445,109 @@ describe("GET /api/users/:username",()=>{
         })
     })
 })
+describe("PATCH /api/comments/:comment_id",()=>{
+    test("responds with status 200 and an update comment object with votes increase by 1",()=>{
+        return request(app)
+        .patch('/api/comments/5')
+        .send({ inc_votes : 1 })
+        .expect(200)
+        .then(({body})=>{
+            expect(body.comment).toEqual({
+                body: "I hate streaming noses",
+                votes: 1,
+                author: "icellusedkars",
+                article_id: 1,
+                created_at: '2020-11-03T21:00:00.000Z',
+                comment_id: 5
+            })
+        })
+    })
+    test('responds with status 400 and error message Bad Request when body passed has wrong data type', () => {
+        return request(app)
+        .patch('/api/comments/1')
+        .send({ inc_votes: 'votes' })
+        .expect(400)
+        .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
+        });
+    })
+    test('responds with status 400 and error message Bad Request when fields/body are missing/malformed', () => {
+        return request(app)
+        .patch('/api/comments/1')
+        .send({ })
+        .expect(400)
+        .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
+        });
+    })
+    test('responds with status 404 and error message Not Found when id passed does not exist', () => {
+        return request(app)
+        .patch('/api/comments/1000')
+        .send({ inc_votes: 1 })
+        .expect(404)
+        .then((response) => {
+            expect(response.body.msg).toBe('Not Found');
+        });
+    })
+    test('responds with status 400 and error message Bad Request when article id passed has invalid type', () => {
+        return request(app)
+        .patch('/api/comments/IamId')
+        .send({ inc_votes: 1 })
+        .expect(400)
+        .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
+        });
+    })
+})
+describe("POST /api/articles",()=>{
+    test("responds with status 201 and new posted article object with id, votes, comments, created_at",()=>{
+        const newArticle = {
+            author: "lurker",
+            title: "What Life",
+            body: "Getting code logics doing random things",
+            topic: "paper"
+        }
+        return request(app)
+        .post('/api/articles')
+        .send(newArticle)
+        .expect(201)
+        .then(({body})=>{
+            expect(body.article.article_id).toBe(14)
+            expect(body.article.title).toBe('What Life')
+            expect(body.article.topic).toBe('paper')
+            expect(body.article.author).toBe('lurker')
+            expect(body.article.body).toBe('Getting code logics doing random things')
+            expect(body.article.votes).toBe(0)
+            expect(body.article.comment_count).toBe(0)
+        })
+    })
+    test("responds with status 404 and an error Not Found when author or topic doesnt exist",()=>{
+        const newArticle = {
+            author: "lurker",
+            title: "What Life",
+            body: "Getting code logics doing random things",
+            topic: "papers"
+        }
+        return request(app)
+        .post('/api/articles')
+        .send(newArticle)
+        .expect(404)
+        .then(({body})=>{
+            expect(body.msg).toBe("Not Found")
+        })
+    })
+    test("responds with status 400 and an error Bad Request when a required field is missing",()=>{
+        const newArticle = {
+            author: "lurker",
+            body: "Getting code logics doing random things",
+            topic: "papers"
+        }
+        return request(app)
+        .post('/api/articles')
+        .send(newArticle)
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad Request")
+        })
+    })
+})

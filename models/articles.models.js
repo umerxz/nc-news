@@ -91,3 +91,13 @@ exports.updateArticleById = (article_id,newVotes) => {
         return rows[0]
     })
 }
+exports.insertArticle = ({author,title,body,topic}) => {
+    return db.query(
+        format(
+            `INSERT INTO articles (author,title,body,topic) VALUES %L RETURNING *;`,[[author,title,body,topic]]
+        )
+    )
+    .then(({rows})=>{
+        return rows[0]
+    })
+}
