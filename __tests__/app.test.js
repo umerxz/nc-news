@@ -669,7 +669,6 @@ describe("POST /api/topics",()=>{
         .send({ slug: 1231, description: 23 })
         .expect(400)
         .then((response) => {
-            console.log(response.body)
             expect(response.body.msg).toBe('Bad Request');
         });
     })
