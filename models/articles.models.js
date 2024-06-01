@@ -17,7 +17,12 @@ exports.fetchArticleById = (id) =>{
         return result.rows[0]
     })
 }
-exports.fetchArticles = ({topic,sort_by='created_at',order='DESC',limit=10,p}) => {
+exports.fetchArticles = ({topic,sort_by='created_at',order='DESC',limit=10,p=1}) => {
+
+    if(limit<=0 || p<=0){
+        return Promise.reject({status:400,msg:"Bad Request"})
+    }
+
     const queryValues = []
     let query = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.votes, articles.created_at, COUNT(comments.article_id)::INT AS comment_count FROM articles 
     LEFT JOIN comments ON comments.article_id = articles.article_id`
@@ -27,32 +32,43 @@ exports.fetchArticles = ({topic,sort_by='created_at',order='DESC',limit=10,p}) =
         query += ` WHERE topic = $${queryValues.length}`
     }
 
-    if(!["ASC","DESC"].includes(order.toUpperCase())){
-        return Promise.reject({status: 400, msg: 'Bad Request'})
-    }
-
     const validSortBy = ['created_at',"author", "topic"]
-    if(!validSortBy.includes(sort_by) && sort_by){
+    if( (!validSortBy.includes(sort_by) && sort_by) || !["ASC","DESC"].includes(order.toUpperCase()) ){
         return Promise.reject({status: 400, msg: 'Bad Request'})
     }
 
     query += ` GROUP BY articles.article_id ORDER BY articles.${sort_by} ${order}`
+
+    const totalArticleCountQuery = `SELECT COUNT(*) AS total_count FROM (${query});`
+
+    const paginationArray = [...queryValues]
+
     if(limit){
         limit=Number(limit)
-        queryValues.push(limit)
-        query += ` LIMIT $${queryValues.length}`
+        paginationArray.push(limit)
+        query += ` LIMIT $${paginationArray.length}`
     }
+    p=Number(p)
     const offset = (p-1)*limit
     if(p){
-        p=Number(p)
-        queryValues.push(offset)
-        query += ` OFFSET $${(queryValues.length)}`
+        paginationArray.push(offset)
+        query += ` OFFSET $${(paginationArray.length)}`
     }
 
     query += ';'
-    return db.query(query,queryValues)
-    .then((results)=>{
-        return results.rows
+    return Promise.all([db.query(query,paginationArray),db.query(totalArticleCountQuery,queryValues)])
+    .then(([articles,total_count])=>{
+
+        if(!articles.rows.length){
+            return Promise.reject({
+                status:400,
+                msg: "Bad Request"
+            })
+        }
+        return {
+            articles:articles.rows,
+            total_count:total_count.rows[0].total_count
+        }
     })
 }
 exports.checkArticleExists = ({article_id}) => {
