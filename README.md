@@ -13,7 +13,7 @@ The project provides some endpoints to interact with the various topics, article
 In the terminal, run the following commands
 ```
     git clone https://github.com/umerxz/be-nc-news-backend-project.git
-    cd be-nc-new-backened-project
+    cd be-nc-new-backend-project
 ```
 ### 2. Installation
 To install all relevant dependencies and devDependencies from package.json, run
@@ -36,8 +36,9 @@ This will install the following setted up dependencies
 
 To connect to the databases:
 
-    1. create 2 files, .env.test and .env.development, for test and development.
-    2. In each file use PGDATABASE=database_name, replacing the database_name with the name of the database to connect to.
+    1. Install postgres and start the server. 
+    2. In the root directiry, create 2 files, .env.test and .env.development, for test and development. Add these files in .gitignore.
+    3. In each file use PGDATABASE=database_name, replacing the database_name with the name of the database to connect to.
 
 To create and seed the database run the following commands  
 ```
