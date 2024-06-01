@@ -71,9 +71,9 @@ exports.fetchArticles = ({topic,sort_by='created_at',order='DESC',limit=10,p=1})
         }
     })
 }
-exports.checkArticleExists = (id) => {
+exports.checkArticleExists = ({article_id}) => {
     return db.query(
-        `SELECT * FROM articles WHERE article_id = $1`, [id]
+        `SELECT * FROM articles WHERE article_id = $1`, [article_id]
     )
     .then((results)=>{
         if(!results.rows.length){
@@ -81,14 +81,31 @@ exports.checkArticleExists = (id) => {
         }
     })
 }
-exports.fetchArticleCommentsById = (id) => {
-    return db.query(
-        `select comments.*
-        from articles
-        join comments on comments.article_id = articles.article_id
-        where articles.article_id=$1
-        order by comments.created_at desc`,[id]
-    )
+exports.fetchArticleCommentsById = ({article_id},{limit=10,p}) => {
+    let query= `select comments.*
+    from articles
+    join comments on comments.article_id = articles.article_id`
+    const queryValues=[]
+    
+    if(article_id){
+        queryValues.push(article_id)
+        query += ` where articles.article_id=$${queryValues.length}`
+    }
+    query += ' order by comments.created_at desc'
+
+    if(limit){
+        limit=Number(limit)
+        queryValues.push(limit)
+        query += ` LIMIT $${queryValues.length}`
+    }
+    const offset = (p-1)*limit
+    if(p){
+        p=Number(p)
+        queryValues.push(offset)
+        query += ` OFFSET $${(queryValues.length)}`
+    }
+    query += ';'
+    return db.query(query,queryValues)
     .then((results) => {
         return (results.rows)
     });
@@ -127,5 +144,15 @@ exports.insertArticle = ({author,title,body,topic}) => {
     )
     .then(({rows})=>{
         return rows[0]
+    })
+}
+exports.removeArticleById = ({article_id}) => {
+    return db.query(
+        `DELETE FROM articles WHERE article_id = $1 RETURNING *;`,[article_id]
+    )
+    .then(({rows})=>{
+        if(!rows.length){
+            return Promise.reject({ status:404, msg:"Not Found" })
+        }
     })
 }

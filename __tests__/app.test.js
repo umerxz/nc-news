@@ -600,10 +600,113 @@ describe("GET /api/articles (pagination)",()=>{
     test("responds with status 404 and error msg Bad Request when a page requested doesnt have anything to display as limit is set too high",()=>{
         return request(app)
         .get('/api/articles?&p=3&limit=10')
+})
+describe("GET /api/articles/:article_id/comments (pagination)",()=>{
+    test("responds with status 200 and an array of that articles comments objects, with 2 articles on page 2",()=>{
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.comments).toBeSortedBy('created_at',{descending:true})
+            body.comments.map((comment)=>{
+                expect(comment.article_id).toBe(1)
+                expect(comment).toMatchObject({
+                    article_id: expect.any(Number),
+                    comment_id: expect.any(Number),
+                    body: expect.any(String),
+                    votes: expect.any(Number),
+                    author: expect.any(String),
+                })
+            })
+        })
+    })
+    test("responds with status 400 and error msg Bad Request if invalid page number given",()=>{
+        return request(app)
+        .get('/api/articles/1/comments?limit=10&p=0')
         .expect(400)
         .then(({body})=>{
             expect(body.msg).toBe("Bad Request")
         })
     })
-
+    test("responds with status 400 and error msg Bad Request if invalid type limit or page is given",()=>{
+        return request(app)
+        .get('/api/articles/1/comments?limit=asd&p=1')
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad Request")
+        })
+    })
+    test("responds with status 400 and error msg Bad Request if invalid type id is given",()=>{
+        return request(app)
+        .get('/api/articles/ID/comments?limit=asd&p=1')
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad Request")
+        })
+    })
+    test("responds with status 404 and error msg Not Found if id doesnt exist",()=>{
+        return request(app)
+        .get('/api/articles/99999/comments?limit=1&p=1')
+        .expect(404)
+        .then(({body})=>{
+            expect(body.msg).toBe("Not Found")
+        })
+    })
+})
+describe("POST /api/topics",()=>{
+    test("responds with status 201, posts the new topic and sends the new topic back to the client",()=>{
+        const newTopics = {
+            slug: "topic name here",
+            description: "description here"
+        }
+        return request(app)
+        .post('/api/topics')
+        .send(newTopics)
+        .expect(201)
+        .then(({body})=>{
+            expect(body.topic.slug).toBe("topic name here")
+            expect(body.topic.description).toBe("description here")
+        })
+    })
+    test('responds with 400 and Bad Request error message when a required field Primary Key is missing', () => {
+        return request(app)
+        .post('/api/topics')
+        .send({ description: "description here" })
+        .expect(400)
+        .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
+        });
+    })
+    test('responds with 400 and Bad Request error message when an wrong type is given', () => {
+        return request(app)
+        .post('/api/topics')
+        .send({ slug: 1231, description: 23 })
+        .expect(400)
+        .then((response) => {
+            expect(response.body.msg).toBe('Bad Request');
+        });
+    })
+})
+describe("DELETE /api/articles/:article_id",()=>{
+    test("responds with status 204 and an empty sends an empty response back",()=>{
+        return request(app)
+        .delete('/api/articles/1')
+        .expect(204)
+    })
+    test("responds with status 404 and error msg Not Found when id does not exist",()=>{
+        return request(app)
+        .delete('/api/articles/999999')
+        .expect(404)
+        .then(({body})=>{
+            expect(body.msg).toBe("Not Found")
+        })
+    })
+    test("responds with status 400 and error msg Bad Request when id passed of wrong type",()=>{
+        return request(app)
+        .delete('/api/articles/IdHere')
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad Request")
+        })
+    })
 })

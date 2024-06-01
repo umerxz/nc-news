@@ -1,7 +1,9 @@
 const { fetchArticleById, fetchArticles, 
     fetchArticleCommentsById, checkArticleExists, 
     insertArticleCommentById, updateArticleById, 
-    insertArticle } = require("../models/articles.models");
+    insertArticle, 
+    removeArticleById} = require("../models/articles.models");
+const { removeCommentByArticleId } = require("../models/comments.models");
 
 exports.getArticleById = (req, res, next) => {
     fetchArticleById(req.params.article_id)
@@ -18,10 +20,9 @@ exports.getArticles = (req, res, next) => {
     .catch(next);
 }
 exports.getArticleCommentsById = (req, res, next) => {
-    const article_id=req.params.article_id
-    const promises = [fetchArticleCommentsById(article_id)]
+    const promises = [fetchArticleCommentsById(req.params,req.query)]
     
-    promises.push(checkArticleExists(article_id))
+    promises.push(checkArticleExists(req.params,req.query))
     
     Promise.all(promises)
     .then((resolvedPromises)=>{
@@ -54,6 +55,17 @@ exports.postArticle = (req, res, next) => {
     })
     .then((article)=>{
         res.status(201).send({article})
+    })
+    .catch(next)
+}
+exports.deleteArticleById = (req, res, next) => {
+
+    const promises = [removeCommentByArticleId(req.params),removeArticleById(req.params)]
+    
+    Promise.all(promises)
+    .then((resolvedPromises)=>{
+        console.log("<<<<<")
+        res.status(204).send()
     })
     .catch(next)
 }
