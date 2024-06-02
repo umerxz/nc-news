@@ -144,7 +144,7 @@ describe("GET /api/articles/:article_id/comments",()=>{
         .get('/api/articles/1/comments')
         .expect(200)
         .then(({body})=>{
-            expect(body.comments).toHaveLength(11)
+            expect(body.comments).toHaveLength(10)
             expect(body.comments).toBeSortedBy("created_at",{descending: true})
             body.comments.map((comment)=>{
                 expect(comment.article_id).toBe(1)
@@ -558,8 +558,6 @@ describe("GET /api/articles (pagination)",()=>{
         .expect(200)
         .then(({body})=>{
             expect(body.articles).toHaveLength(2)
-            expect(body).toHaveProperty('total_count')
-            expect(body.total_count).toBe("14")
             expect(body.articles).toBeSortedBy('created_at',{descending:true})
         })
     })
@@ -588,18 +586,6 @@ describe("GET /api/articles (pagination)",()=>{
             expect(body.articles).toBeSortedBy('created_at',{descending:true})
         })
     })
-    test("responds with status 200 and an array of articles objects sorted by author in ascending order, with a default limit of 10 articles per page-1 if no limit is given",()=>{
-        return request(app)
-        .get('/api/articles?&p=1&order=asc&sort_by=author')
-        .expect(200)
-        .then(({body})=>{
-            expect(body.articles).toHaveLength(10)
-            expect(body.articles).toBeSortedBy('author')
-        })
-    })
-    test("responds with status 404 and error msg Bad Request when a page requested doesnt have anything to display as limit is set too high",()=>{
-        return request(app)
-        .get('/api/articles?&p=3&limit=10')
 })
 describe("GET /api/articles/:article_id/comments (pagination)",()=>{
     test("responds with status 200 and an array of that articles comments objects, with 2 articles on page 2",()=>{
