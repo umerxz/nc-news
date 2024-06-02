@@ -144,7 +144,7 @@ describe("GET /api/articles/:article_id/comments",()=>{
         .get('/api/articles/1/comments')
         .expect(200)
         .then(({body})=>{
-            expect(body.comments).toHaveLength(11)
+            expect(body.comments).toHaveLength(10)
             expect(body.comments).toBeSortedBy("created_at",{descending: true})
             body.comments.map((comment)=>{
                 expect(comment.article_id).toBe(1)
@@ -597,9 +597,15 @@ describe("GET /api/articles (pagination)",()=>{
             expect(body.articles).toBeSortedBy('author')
         })
     })
-    test("responds with status 404 and error msg Bad Request when a page requested doesnt have anything to display as limit is set too high",()=>{
+    test("responds with status 400 and error msg Bad Request when a page requested doesnt have anything to display as limit is set too high",()=>{
         return request(app)
         .get('/api/articles?&p=3&limit=10')
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad Request")
+
+        })
+    })
 })
 describe("GET /api/articles/:article_id/comments (pagination)",()=>{
     test("responds with status 200 and an array of that articles comments objects, with 2 articles on page 2",()=>{
