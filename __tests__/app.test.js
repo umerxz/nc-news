@@ -682,3 +682,26 @@ describe("POST /api/topics",()=>{
         });
     })
 })
+describe("DELETE /api/articles/:article_id",()=>{
+    test("responds with status 204 and an empty sends an empty response back",()=>{
+        return request(app)
+        .delete('/api/articles/1')
+        .expect(204)
+    })
+    test("responds with status 404 and error msg Not Found when id does not exist",()=>{
+        return request(app)
+        .delete('/api/articles/999999')
+        .expect(404)
+        .then(({body})=>{
+            expect(body.msg).toBe("Not Found")
+        })
+    })
+    test("responds with status 400 and error msg Bad Request when id passed of wrong type",()=>{
+        return request(app)
+        .delete('/api/articles/IdHere')
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad Request")
+        })
+    })
+})

@@ -1,7 +1,9 @@
 const { fetchArticleById, fetchArticles, 
     fetchArticleCommentsById, checkArticleExists, 
     insertArticleCommentById, updateArticleById, 
-    insertArticle } = require("../models/articles.models");
+    insertArticle, 
+    removeArticleById} = require("../models/articles.models");
+const { removeCommentByArticleId } = require("../models/comments.models");
 
 exports.getArticleById = (req, res, next) => {
     fetchArticleById(req.params.article_id)
@@ -53,6 +55,17 @@ exports.postArticle = (req, res, next) => {
     })
     .then((article)=>{
         res.status(201).send({article})
+    })
+    .catch(next)
+}
+exports.deleteArticleById = (req, res, next) => {
+
+    const promises = [removeCommentByArticleId(req.params),removeArticleById(req.params)]
+    
+    Promise.all(promises)
+    .then((resolvedPromises)=>{
+        console.log("<<<<<")
+        res.status(204).send()
     })
     .catch(next)
 }
