@@ -672,4 +672,13 @@ describe("POST /api/topics",()=>{
             expect(response.body.msg).toBe('Bad Request');
         });
     })
+    test('responds with 403 and Already Exists message when an existing ', () => {
+        return request(app)
+        .post('/api/topics')
+        .send({ slug: "mitch", description: "description" })
+        .expect(403)
+        .then((response) => {
+            expect(response.body.msg).toBe('Already Exists');
+        });
+    })
 })
