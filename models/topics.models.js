@@ -1,5 +1,5 @@
 const db = require('../db/connection')
-
+const fs = require('fs/promises')
 exports.fetchTopics=()=>{
     return db.query(`SELECT * FROM topics;`)
     .then((topics)=>{
@@ -10,3 +10,11 @@ exports.fetchTopics=()=>{
 exports.invalidPaths = () => {
     return Promise.reject({ status: 404, msg: "Invalid Path Typed. Did you mean /api/topics ?" });
 };
+
+exports.selectEndpoints = () => {
+    return fs.readFile(`${process.cwd()}/endpoints.json`,'utf-8')
+    .then((endpoints)=>{
+        const parsedEndpoints = JSON.parse(endpoints)
+        return {endpoints:parsedEndpoints}
+    })
+}
