@@ -1,15 +1,16 @@
 const express = require("express");
-const { getTopics, invalidRoutes, getEndpoints } = require("./controllers/topics.controllers");
-const { handleCustomErrors, handleServerErrors } = require("./error-handlers/error-handler");
+const { invalidRoutes } = require("./controllers/topics.controllers");
+const { handleCustomErrors, handlePsqlErrors, handleServerErrors } = require("./error-handlers/error-handler");
+const apiRouter = require('./routes/api-router')
 
 const app = express();
+app.use(express.json())
 
-app.get('/api/topics',getTopics)
-app.get('/api',getEndpoints)
-
+app.use('/api',apiRouter)
 app.get('*',invalidRoutes)
 
 app.use(handleCustomErrors)
+app.use(handlePsqlErrors)
 app.use(handleServerErrors)
 
 module.exports=app
