@@ -25,8 +25,8 @@ describe("TOPICS",()=>{
             });
         });
     })
-    describe("* - Invalid Topics Routes",()=>{
-        test("response with the status of 404 and Invalid Path Typed error msg when invalid route is provided", () => {
+    describe("GET All Topics - Invalid Topics Routes",()=>{
+        test("response with the status of 404 and Invalid Path Typed. Did you mean /api/topics ? error msg when invalid route is provided", () => {
             return request(app)
             .get("/api/notARoute")
             .expect(404)
