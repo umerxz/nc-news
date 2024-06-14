@@ -39,7 +39,7 @@ exports.fetchArticles = ({topic,sort_by='created_at',order='DESC',limit=10,p=1})
         const query = getArticlesSqlQuery(filterQuery,sort_by,order,limitOffsetQuery)
         return db.query(query,queryValues)
     })
-    .then( (results) => {
+    .then((results) => {
         return { articles: results.rows, total_count: totalArticlesCount }
     })
 }
