@@ -1,5 +1,8 @@
 const db = require('../db/connection')
 const format = require('pg-format')
+const fs = require('fs/promises')
+const { getTotalCount, validSortOrder, validLimit, validPage, getArticlesFilterQuery, getTotalArticlesSqlQuery, getArticlesSqlQuery, getLimitOffsetQuery, nonExistingArticlesTopic, pageBeyondLimit, getArticleCommentsQuery, getTotalArticleCommentsSqlQuery } = require('../models-utils/articles.utils.models')
+
 exports.fetchArticleById = (id) =>{
     return db.query(
         `SELECT articles.*, COUNT(comments.article_id)::INT AS comment_count FROM articles 
@@ -9,94 +12,65 @@ exports.fetchArticleById = (id) =>{
     )
     .then((result)=>{
         if(result.rows.length===0){
-            return Promise.reject({
-                status:404,
-                msg: 'Not Found'
-            })
+            return Promise.reject({ status:404, msg: 'Article Not Found.' })
         }
         return result.rows[0]
     })
 }
-exports.fetchArticles = ({topic,sort_by='created_at',order='DESC',limit=10,p}) => {
-    const queryValues = []
-    let query = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.votes, articles.created_at, COUNT(comments.article_id)::INT AS comment_count FROM articles 
-    LEFT JOIN comments ON comments.article_id = articles.article_id`
-    
-    if(topic){
-        queryValues.push(topic)
-        query += ` WHERE topic = $${queryValues.length}`
-    }
-
-    if(!["ASC","DESC"].includes(order.toUpperCase())){
-        return Promise.reject({status: 400, msg: 'Bad Request'})
-    }
-
-    const validSortBy = ['created_at',"author", "topic"]
-    if(!validSortBy.includes(sort_by) && sort_by){
-        return Promise.reject({status: 400, msg: 'Bad Request'})
-    }
-
-    query += ` GROUP BY articles.article_id ORDER BY articles.${sort_by} ${order}`
-    if(limit){
-        limit=Number(limit)
-        queryValues.push(limit)
-        query += ` LIMIT $${queryValues.length}`
-    }
-    const offset = (p-1)*limit
-    if(p){
-        p=Number(p)
-        queryValues.push(offset)
-        query += ` OFFSET $${(queryValues.length)}`
-    }
-
-    query += ';'
-    return db.query(query,queryValues)
-    .then((results)=>{
-        return results.rows
+exports.fetchArticles = ({topic,sort_by='created_at',order='DESC',limit=10,p=1}) => {
+    const queryValues=[]
+    const filterQuery = getArticlesFilterQuery(topic,queryValues)
+    let totalArticlesCount
+    limit=Number(limit)
+    page=Number(p)
+    return validSortOrder(sort_by,order)
+    .then( ()=> validLimit(limit) )
+    .then( (limit)=> validPage(page) )
+    .then( (page)=> getTotalCount(getTotalArticlesSqlQuery(filterQuery),queryValues) )
+    .then( (totalArticles)=>{
+        totalArticlesCount= +totalArticles
+        return nonExistingArticlesTopic(totalArticlesCount)
     })
+    .then(()=>{
+        return pageBeyondLimit(page,totalArticlesCount,limit)
+    })
+    .then(()=>{
+        const limitOffsetQuery = getLimitOffsetQuery(limit,page,queryValues)
+        const query = getArticlesSqlQuery(filterQuery,sort_by,order,limitOffsetQuery)
+        return db.query(query,queryValues)
+    })
+    .then( (results)=> { articles: results.rows, total_count: totalArticlesCount } )
 }
 exports.checkArticleExists = ({article_id}) => {
-    return db.query(
-        `SELECT * FROM articles WHERE article_id = $1`, [article_id]
-    )
+    return db.query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
     .then((results)=>{
         if(!results.rows.length){
-            return Promise.reject({ status: 404, msg: "Not Found" })
+            return Promise.reject({ status: 404, msg: "Article Not Found." })
         }
     })
 }
-exports.fetchArticleCommentsById = ({article_id},{limit=10,p}) => {
-    let query= `select comments.*
-    from articles
-    join comments on comments.article_id = articles.article_id`
+exports.fetchArticleCommentsById = async ({article_id},{limit=10,p=1}) => {
     const queryValues=[]
-    
-    if(article_id){
-        queryValues.push(article_id)
-        query += ` where articles.article_id=$${queryValues.length}`
-    }
-    query += ' order by comments.created_at desc'
+    limit=Number(limit)
+    page=Number(p)
+    let query = getArticleCommentsQuery(article_id,queryValues)
 
-    if(limit){
-        limit=Number(limit)
-        queryValues.push(limit)
-        query += ` LIMIT $${queryValues.length}`
-    }
-    const offset = (p-1)*limit
-    if(p){
-        p=Number(p)
-        queryValues.push(offset)
-        query += ` OFFSET $${(queryValues.length)}`
-    }
-    query += ';'
-    return db.query(query,queryValues)
-    .then((results) => {
-        return (results.rows)
-    });
+    return validLimit(limit)
+    .then( ()=> validPage(page) )
+    .then( ()=> getTotalCount(getTotalArticleCommentsSqlQuery(query),queryValues) )
+    .then((totalComments) => {
+        if(!(+totalComments)) return []
+        return pageBeyondLimit(page,+totalComments,limit)        
+    })
+    .then(()=>{
+        query += getLimitOffsetQuery(limit,page,queryValues)
+        return db.query(query,queryValues)
+    })
+    .then( ({rows}) => rows );
 }
 exports.insertArticleCommentById = (id,username,body) => {
     if(!id || !username || !body){
-        return Promise.reject({ status:400, msg: "Bad Request"})
+        return Promise.reject({ status:400, msg: "Missing Required Fields."})
     }
     const formattedComment = [[Number(id),username,body]]
     return db.query(
@@ -115,15 +89,21 @@ exports.updateArticleById = (article_id,newVotes) => {
     )
     .then(({rows})=>{
         if(!rows.length){
-            return Promise.reject({ status:404, msg:"Not Found" })
+            return Promise.reject({ status:404, msg:"Article Not Found." })
         }
         return rows[0]
     })
 }
-exports.insertArticle = ({author,title,body,topic}) => {
+exports.insertArticle = ({author,title,body,topic,article_img_url}) => {
+    const values = [author,title,body,topic]
+    const identifiers = ['author','title','body','topic']
+    if(article_img_url){
+        values.push(article_img_url)
+        identifiers.push('article_img_url')
+    }
     return db.query(
         format(
-            `INSERT INTO articles (author,title,body,topic) VALUES %L RETURNING *;`,[[author,title,body,topic]]
+            `INSERT INTO articles (%I) VALUES (%L) RETURNING *;`,identifiers,values
         )
     )
     .then(({rows})=>{

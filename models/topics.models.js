@@ -1,15 +1,11 @@
 const db = require('../db/connection')
 const format = require('pg-format')
 const fs = require('fs/promises')
+
 exports.fetchTopics=()=>{
     return db.query(`SELECT * FROM topics;`)
-    .then((topics)=>{
-        return topics.rows
-    })
+    .then( (topics)=> topics.rows )
 }
-exports.invalidPaths = () => {
-    return Promise.reject({ status: 404, msg: "Invalid Path Typed. Did you mean /api/topics ?" });
-};
 exports.selectEndpoints = () => {
     return fs.readFile(`${process.cwd()}/endpoints.json`,'utf-8')
     .then((endpoints)=>{
@@ -26,7 +22,5 @@ exports.insertTopic = ({slug,description}) => {
             `INSERT INTO topics (slug,description) VALUES %L RETURNING *;`,[[slug,description]]
         )
     )
-    .then(({rows})=>{
-        return rows[0]
-    })
+    .then( ({rows})=> rows[0] )
 }

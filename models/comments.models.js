@@ -6,7 +6,7 @@ exports.removeCommentById = (comment_id) => {
     )
     .then(({rows})=>{
         if(!rows.length){
-            return Promise.reject({ status:404, msg:"Not Found" })
+            return Promise.reject({ status:404, msg:"No Comment Found" })
         }
     })
 }
@@ -16,7 +16,7 @@ exports.updateCommentById = ({comment_id},{inc_votes}) =>{
     )
     .then(({rows})=>{
         if(!rows.length){
-            return Promise.reject({ status:404, msg:"Not Found" })
+            return Promise.reject({ status:404, msg:"Comment Not Found." })
         }
         return rows[0]
     })

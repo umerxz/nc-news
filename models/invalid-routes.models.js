@@ -1,0 +1,1 @@
+exports.invalidPaths = () => Promise.reject({ status: 404, msg: "Invalid Path Typed. Visit /api for available paths." });
