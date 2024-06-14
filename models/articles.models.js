@@ -39,7 +39,9 @@ exports.fetchArticles = ({topic,sort_by='created_at',order='DESC',limit=10,p=1})
         const query = getArticlesSqlQuery(filterQuery,sort_by,order,limitOffsetQuery)
         return db.query(query,queryValues)
     })
-    .then( (results)=> { articles: results.rows, total_count: totalArticlesCount } )
+    .then( (results) => {
+        return { articles: results.rows, total_count: totalArticlesCount }
+    })
 }
 exports.checkArticleExists = ({article_id}) => {
     return db.query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
