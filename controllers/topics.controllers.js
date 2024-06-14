@@ -1,4 +1,4 @@
-const { fetchTopics, invalidPaths, selectEndpoints, insertTopic } = require("../models/topics.models")
+const { fetchTopics, selectEndpoints, insertTopic } = require("../models/topics.models")
 
 exports.getTopics=(req,res,next)=>{
     fetchTopics()
@@ -7,10 +7,6 @@ exports.getTopics=(req,res,next)=>{
         next(err)
     });
 }
-exports.invalidRoutes = (req, res, next) => {
-    invalidPaths()
-    .catch(next);
-};
 exports.getEndpoints = (req, res, next) => {
     selectEndpoints()
     .then((endpoints)=>{

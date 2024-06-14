@@ -9,9 +9,16 @@
       "topics": [{ "slug": "football", "description": "Footie!" }]
     }
   },
+  "POST /api/topics": {
+    "description": "posts a new topic and returns the newly posted topic",
+    "body_accepts": ["slug", "description"],
+    "exampleResponse": {
+      "topics": [{ "slug": "football", "description": "Footie!" }]
+    }
+  },
   "GET /api/articles": {
     "description": "serves an array of all articles",
-    "queries": ["author", "topic", "sort_by", "order"],
+    "queries": ["created_at","author", "topic","asc","desc","limit","p"],
     "exampleResponse": {
       "articles": [
         {
@@ -24,6 +31,29 @@
           "comment_count": 6
         }
       ]
+    }
+  },
+  "POST /api/articles":{
+    "description":"serves with the newly posted article",
+    "queries":[],
+    "requestBody":{
+      "author": "lurker",
+      "title": "What Life",
+      "body": "Getting code logics doing random things",
+      "topic": "paper"
+    },
+    "exampleResponse":{
+      "article":{
+        "article_id": 14,
+        "title": "What Life",
+        "topic": "paper",
+        "author": "lurker",
+        "body": "Getting code logics doing random things",
+        "created_at": "2024-05-31T10:40:27.544Z",
+        "votes": 0,
+        "article_img_url": "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700",
+        "comment_count": 0
+      }
     }
   },
   "GET /api/articles/:article_id": {
@@ -42,9 +72,33 @@
       }
     }
   },
+  "PATCH /api/articles/:article_id":{
+    "description": "serves with an object of updated article",
+    "queries": [],
+    "requestBody": {
+      "inc_votes": 1
+    },
+    "exampleResponse":{
+      "article": {
+        "article_id": 1,
+        "title": "Living in the shadow of a great man",
+        "topic": "mitch",
+        "author": "butter_bridge",
+        "body": "I find this existence challenging",
+        "created_at": "2020-07-09T20:11:00.000Z",
+        "votes": 0,
+        "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+      }
+    }
+  },
+  "DELETE /api/articles/:article_id":{
+    "description": "serves with empty object after deleting the article if valid existing id is given",
+    "queries":[],
+    "exampleResponse":{}
+  },
   "GET /api/articles/:article_id/comments":{
     "description": "serves with an array of comments for the article id provided",
-    "queries": [],
+    "queries": ["limit","p"],
     "exampleResponse":{
       "comments":[
         {
@@ -84,52 +138,10 @@
       }
     }
   },
-  "PATCH /api/articles/:article_id":{
-    "description": "serves with an object of updated article",
-    "queries": [],
-    "requestBody": {
-      "inc_votes": 1
-    },
-    "exampleResponse":{
-      "article": {
-        "article_id": 1,
-        "title": "Living in the shadow of a great man",
-        "topic": "mitch",
-        "author": "butter_bridge",
-        "body": "I find this existence challenging",
-        "created_at": "2020-07-09T20:11:00.000Z",
-        "votes": 0,
-        "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
-      }
-    }
-  },
   "DELETE /api/comments/:comment_id":{
     "description": "serves with an empty response after deleting the comment",
     "queries": [],
-    "requestBody": {},
     "exampleResponse":{}
-  },
-  "GET /api/users":{
-    "description": "serves an array of objects of all users",
-    "queries": [],
-    "exampleResponse": {
-      "topics": [{
-        "username": "butter_bridge",
-        "name": "jonny",
-        "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
-      }]
-    }
-  },
-  "GET /api/users/:username":{
-    "description":"serves with an object of a user with the username given",
-    "queries":[],
-    "exampleResponse":{
-      "username":{
-        "username": "lurker",
-        "name": "do_nothing",
-        "avatar_url": "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png"
-      }
-    }
   },
   "PATCH /api/comments/:comment_id":{
     "description":"serves with an object of a comment whose votes are updated",
@@ -146,26 +158,25 @@
       }
     }
   },
-  "POST /api/articles":{
-    "description":"serves with the newly posted article",
+  "GET /api/users":{
+    "description": "serves an array of objects of all users",
+    "queries": [],
+    "exampleResponse": {
+      "users": [{
+        "username": "butter_bridge",
+        "name": "jonny",
+        "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+      }]
+    }
+  },
+  "GET /api/users/:username":{
+    "description":"serves with an object of a user with the username given",
     "queries":[],
-    "requestBody":{
-      "author": "lurker",
-      "title": "What Life",
-      "body": "Getting code logics doing random things",
-      "topic": "paper"
-    },
     "exampleResponse":{
-      "article":{
-        "article_id": 14,
-        "title": "What Life",
-        "topic": "paper",
-        "author": "lurker",
-        "body": "Getting code logics doing random things",
-        "created_at": "2024-05-31T10:40:27.544Z",
-        "votes": 0,
-        "article_img_url": "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700",
-        "comment_count": 0
+      "username":{
+        "username": "lurker",
+        "name": "do_nothing",
+        "avatar_url": "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png"
       }
     }
   }

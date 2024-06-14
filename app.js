@@ -1,7 +1,7 @@
-const express = require("express");
-const { invalidRoutes } = require("./controllers/topics.controllers");
 const { handleCustomErrors, handlePsqlErrors, handleServerErrors } = require("./error-handlers/error-handler");
-const apiRouter = require('./routes/api-router')
+const { invalidRoutes } = require("./controllers/invalid-routes.controllers");
+const express = require("express");
+const apiRouter = require('./routes/api-router');
 
 const app = express();
 app.use(express.json())

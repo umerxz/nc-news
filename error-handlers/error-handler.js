@@ -4,11 +4,14 @@ exports.handleCustomErrors = (err, req, res, next) => {
     next(err)
 };
 exports.handlePsqlErrors=(err,req,res,next)=>{
-    if(err.code==='22P02' || err.code==='23502' || err.code==='2201X' || err.code==='2201W') {
-        res.status(400).send({ msg: 'Bad Request' })
+    if(err.code==='22P02') {
+        res.status(400).send({ msg: 'Bad Request: Incorrect Type.' })
+    }
+    else if(err.code==='23502') {
+        res.status(400).send({ msg: 'Missing Information.' })
     }
     else if(err.code==='23503') {
-        res.status(404).send({ msg: 'Not Found' })
+        res.status(404).send({ msg: 'Not Found.' })
     }
     else if(err.code==='23505'){
         res.status(403).send({msg:"Already Exists"})
