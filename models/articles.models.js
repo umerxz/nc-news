@@ -51,25 +51,38 @@ exports.checkArticleExists = ({article_id}) => {
         }
     })
 }
-exports.fetchArticleCommentsById = async ({article_id},{limit=10,p=1}) => {
-    const queryValues=[]
-    limit=Number(limit)
-    page=Number(p)
-    let query = getArticleCommentsQuery(article_id,queryValues)
-
-    return validLimit(limit)
-    .then( ()=> validPage(page) )
-    .then( ()=> getTotalCount(getTotalArticleCommentsSqlQuery(query),queryValues) )
-    .then((totalComments) => {
-        if(!(+totalComments)) return []
-        return pageBeyondLimit(page,+totalComments,limit)        
-    })
-    .then(()=>{
-        query += getLimitOffsetQuery(limit,page,queryValues)
-        return db.query(query,queryValues)
-    })
-    .then( ({rows}) => rows );
+exports.fetchArticleCommentsById = ({article_id}) => {
+    return db.query(
+        `select comments.*
+        from articles
+        join comments on comments.article_id = articles.article_id
+        where articles.article_id=$1
+        order by comments.created_at desc`,[article_id]
+    )
+    .then((results) => {
+        console.log(results)
+        return (results.rows)
+    });
 }
+// exports.fetchArticleCommentsById = async ({article_id},{limit=10,p=1}) => {
+//     const queryValues=[]
+//     limit=Number(limit)
+//     page=Number(p)
+//     let query = getArticleCommentsQuery(article_id,queryValues)
+
+//     return validLimit(limit)
+//     .then( ()=> validPage(page) )
+//     .then( ()=> getTotalCount(getTotalArticleCommentsSqlQuery(query),queryValues) )
+//     .then((totalComments) => {
+//         if(!(+totalComments)) return []
+//         return pageBeyondLimit(page,+totalComments,limit)        
+//     })
+//     .then(()=>{
+//         query += getLimitOffsetQuery(limit,page,queryValues)
+//         return db.query(query,queryValues)
+//     })
+//     .then( ({rows}) => rows );
+// }
 exports.insertArticleCommentById = (id,username,body) => {
     if(!id || !username || !body){
         return Promise.reject({ status:400, msg: "Missing Required Fields."})
