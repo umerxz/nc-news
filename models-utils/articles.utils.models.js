@@ -79,7 +79,6 @@ exports.getArticlesSqlQuery = (filterQuery,sort_by,order,limitOffsetQuery) => {
     GROUP BY articles.article_id`
     if(sort_by==='comment_count') query+=` ORDER BY ${sort_by} ${order} ${limitOffsetQuery}`
     else query+=` ORDER BY articles.${sort_by} ${order} ${limitOffsetQuery}`
-    console.log(query)
     return query
 }
 

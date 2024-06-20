@@ -178,7 +178,6 @@ describe("/api/articles",()=>{
             .get('/api/articles?sort_by=author&order=asc')
             .expect(200)
             .then(({body})=>{
-                console.log(body)
                 expect(body.articles).toHaveLength(10)
                 expect(body.articles).toBeSortedBy('author')
             })

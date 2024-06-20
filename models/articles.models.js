@@ -60,7 +60,6 @@ exports.fetchArticleCommentsById = ({article_id}) => {
         order by comments.created_at desc`,[article_id]
     )
     .then((results) => {
-        console.log(results)
         return (results.rows)
     });
 }
