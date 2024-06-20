@@ -17,7 +17,7 @@ exports.getArticlesFilterQuery = (topic,queryValues) => {
 }
 exports.validSortOrder = (sort_by,order) => {
     return new Promise((resolve,reject)=>{
-        const validSortBy = ['created_at',"author", "topic"]
+        const validSortBy = ['created_at',"author", "topic", "votes", "comment_count"]
         const validOrder = ["ASC","DESC"]
         if(!validOrder.includes(order.toUpperCase())) return reject({status: 400, msg: 'Bad Order Request.'})
         if(!validSortBy.includes(sort_by)) return reject({status: 400, msg: 'Bad Sort Request.'})
