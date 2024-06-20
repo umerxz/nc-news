@@ -863,4 +863,66 @@ describe("/api/users/:username",()=>{
             })
         })
     })
+    describe("POST",()=>{
+        test("reponds with status 201 and the new user added",()=>{
+            const newUser = {
+                username: 'umer.xz',
+                name: 'umer',
+                avatar_url:"https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-512.png"
+            }
+            return request(app)
+            .post('/api/users/')
+            .send(newUser)
+            .expect(201)
+            .then(({body})=>{
+                expect(body.user).toEqual({
+                    username: 'umer.xz',
+                    name: 'umer',
+                    avatar_url:"https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-512.png"
+                })
+            })
+        })
+        test("reponds with status 400 and error msg Incorrect Username Format",()=>{
+            const newUser = {
+                username: '019283',
+                name: 'umer',
+                avatar_url:"https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-512.png"
+            }
+            return request(app)
+            .post('/api/users/')
+            .send(newUser)
+            .expect(400)
+            .then(({body})=>{
+                expect(body.msg).toBe('Incorrect Username Format.')
+            })
+        })
+        test("reponds with status 403 and error msg Already Exists",()=>{
+            const newUser = {
+                username: 'umer.xz',
+                name: 'umer',
+                avatar_url:"https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-512.png"
+            }
+            return request(app)
+            .post('/api/users/')
+            .send(newUser)
+            .expect(403)
+            .then(({body})=>{
+                expect(body.msg).toBe('Already Exists')
+            })
+        })
+        test("reponds with status 400 and error msg Incorrect Username Format if length is less than required",()=>{
+            const newUser = {
+                username: 'umers',
+                name: 'umer',
+                avatar_url:"https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-512.png"
+            }
+            return request(app)
+            .post('/api/users/')
+            .send(newUser)
+            .expect(400)
+            .then(({body})=>{
+                expect(body.msg).toBe('Incorrect Username Format.')
+            })
+        })
+    })
 })
