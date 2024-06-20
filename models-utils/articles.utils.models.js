@@ -64,7 +64,7 @@ exports.getLimitOffsetQuery = (limit,page,queryValues) => {
     return query
 }
 exports.getArticlesSqlQuery = (filterQuery,sort_by,order,limitOffsetQuery) => {
-    return `SELECT 
+    let query = `SELECT 
     articles.author,
     articles.title,
     articles.article_id,
@@ -76,10 +76,11 @@ exports.getArticlesSqlQuery = (filterQuery,sort_by,order,limitOffsetQuery) => {
     FROM articles 
     LEFT JOIN comments ON comments.article_id = articles.article_id
     ${filterQuery}
-    GROUP BY articles.article_id 
-    ORDER BY articles.${sort_by} ${order}
-    ${limitOffsetQuery}
-    `
+    GROUP BY articles.article_id`
+    if(sort_by==='comment_count') query+=` ORDER BY ${sort_by} ${order} ${limitOffsetQuery}`
+    else query+=` ORDER BY articles.${sort_by} ${order} ${limitOffsetQuery}`
+    console.log(query)
+    return query
 }
 
 exports.getArticleCommentsQuery = (article_id,queryValues) => {

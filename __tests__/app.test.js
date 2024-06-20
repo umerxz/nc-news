@@ -178,8 +178,18 @@ describe("/api/articles",()=>{
             .get('/api/articles?sort_by=author&order=asc')
             .expect(200)
             .then(({body})=>{
+                console.log(body)
                 expect(body.articles).toHaveLength(10)
                 expect(body.articles).toBeSortedBy('author')
+            })
+        })
+        test("responds with status 200 and an array of articles objects sorted by article author in ascending order",()=>{
+            return request(app)
+            .get('/api/articles?sort_by=comment_count&order=asc')
+            .expect(200)
+            .then(({body})=>{
+                expect(body.articles).toHaveLength(10)
+                expect(body.articles).toBeSortedBy('comment_count')
             })
         })
         test("responds with status 200 and an array of articles objects sorted by default sort by created_at in ascending order when no sort by provided",()=>{
