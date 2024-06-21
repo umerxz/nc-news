@@ -870,7 +870,7 @@ describe("/api/users/:username",()=>{
                 avatar_url:"https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-512.png"
             }
             return request(app)
-            .post('/api/users/')
+            .post('/api/users')
             .send(newUser)
             .expect(201)
             .then(({body})=>{
@@ -888,7 +888,7 @@ describe("/api/users/:username",()=>{
                 avatar_url:"https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-512.png"
             }
             return request(app)
-            .post('/api/users/')
+            .post('/api/users')
             .send(newUser)
             .expect(400)
             .then(({body})=>{
@@ -902,7 +902,7 @@ describe("/api/users/:username",()=>{
                 avatar_url:"https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-512.png"
             }
             return request(app)
-            .post('/api/users/')
+            .post('/api/users')
             .send(newUser)
             .expect(403)
             .then(({body})=>{
@@ -916,7 +916,7 @@ describe("/api/users/:username",()=>{
                 avatar_url:"https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-512.png"
             }
             return request(app)
-            .post('/api/users/')
+            .post('/api/users')
             .send(newUser)
             .expect(400)
             .then(({body})=>{
