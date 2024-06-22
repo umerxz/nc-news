@@ -584,7 +584,7 @@ describe("/api/articles/:article_id/comments",()=>{
                 })
             })
         })
-        xtest("responds with status 400 and error msg Invalid Page Number if invalid page number given",()=>{
+        test("responds with status 400 and error msg Invalid Page Number if invalid page number given",()=>{
             return request(app)
             .get('/api/articles/1/comments?limit=10&p=0')
             .expect(400)
@@ -592,7 +592,7 @@ describe("/api/articles/:article_id/comments",()=>{
                 expect(body.msg).toBe("Invalid Page Number.")
             })
         })
-        xtest("responds with status 400 and error msg Invalid Limit if invalid limit given",()=>{
+        test("responds with status 400 and error msg Invalid Limit if invalid limit given",()=>{
             return request(app)
             .get('/api/articles/1/comments?limit=-10&p=1')
             .expect(400)
@@ -600,7 +600,7 @@ describe("/api/articles/:article_id/comments",()=>{
                 expect(body.msg).toBe("Invalid Limit.")
             })
         })
-        xtest("responds with status 400 and error msg Invalid Limit if invalid type limit or page is given",()=>{
+        test("responds with status 400 and error msg Invalid Limit if invalid type limit or page is given",()=>{
             return request(app)
             .get('/api/articles/1/comments?limit=asd&p=1')
             .expect(400)
@@ -608,7 +608,7 @@ describe("/api/articles/:article_id/comments",()=>{
                 expect(body.msg).toBe("Invalid Limit.")
             })
         })
-        xtest("responds with status 400 and error msg Bad Request: Incorrect Type if invalid type id is given",()=>{
+        test("responds with status 400 and error msg Bad Request: Incorrect Type if invalid type id is given",()=>{
             return request(app)
             .get('/api/articles/ID/comments?limit=1&p=1')
             .expect(400)
@@ -616,7 +616,7 @@ describe("/api/articles/:article_id/comments",()=>{
                 expect(body.msg).toBe("Bad Request: Incorrect Type.")
             })
         })
-        xtest("responds with status 404 and error msg Article Not Found if id doesnt exist",()=>{
+        test("responds with status 404 and error msg Article Not Found if id doesnt exist",()=>{
             return request(app)
             .get('/api/articles/99999/comments?limit=1&p=2')
             .expect(404)
@@ -624,7 +624,7 @@ describe("/api/articles/:article_id/comments",()=>{
                 expect(body.msg).toBe("Article Not Found.")
             })
         })
-        xtest("responds with status 400 and error msg Invalid Limit if limit passes id invalid",()=>{
+        test("responds with status 400 and error msg Invalid Limit if limit passes id invalid",()=>{
             return request(app)
             .get('/api/articles/1/comments?limit=0&p=1')
             .expect(400)

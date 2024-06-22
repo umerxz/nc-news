@@ -51,17 +51,47 @@ exports.checkArticleExists = ({article_id}) => {
         }
     })
 }
-exports.fetchArticleCommentsById = ({article_id}) => {
-    return db.query(
-        `select comments.*
-        from articles
-        join comments on comments.article_id = articles.article_id
-        where articles.article_id=$1
-        order by comments.created_at desc`,[article_id]
-    )
+exports.fetchArticleCommentsById = ({article_id},{limit=10,p=1}) => {
+    let query= `select comments.*
+    from articles
+    join comments on comments.article_id = articles.article_id`
+    const queryValues=[]
+    const page=Number(p)
+    limit=Number(limit)
+
+    if(limit<=0 || isNaN(limit)) return Promise.reject({ status: 400, msg: "Invalid Limit." })
+    if(page<=0 || isNaN(page)) return Promise.reject({ status: 400, msg: "Invalid Page Number." })
+
+    if(article_id){
+        queryValues.push(article_id)
+        query += ` where articles.article_id=$${queryValues.length}`
+    }
+    query += ' order by comments.created_at desc'
+    console.log(query)
+    if(limit){
+        queryValues.push(limit)
+        query += ` LIMIT $${queryValues.length}`
+    }
+    const offset = (p-1)*limit
+    if(p){
+        queryValues.push(offset)
+        query += ` OFFSET $${(queryValues.length)}`
+    }
+    query += ';'
+    return db.query(query,queryValues)
     .then((results) => {
         return (results.rows)
     });
+//     return db.query(
+//         `select comments.*
+//         from articles
+//         join comments on comments.article_id = articles.article_id
+//         where articles.article_id=$1
+//         order by comments.created_at desc`,[article_id]
+//     )
+//     .then((results) => {
+//         return (results.rows)
+//     });
 }
 // exports.fetchArticleCommentsById = async ({article_id},{limit=10,p=1}) => {
 //     const queryValues=[]
