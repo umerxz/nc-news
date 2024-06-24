@@ -72,12 +72,13 @@ exports.fetchArticleCommentsById = ({article_id},{limit=10,p=1}) => {
     return db.query(`SELECT COUNT(*) AS total_count FROM (${query});`,queryValues)
     .then(({rows})=>{
         totalArticleComments = +(rows[0].total_count)
-        if(totalArticleComments===0) return {comments: [], total_count: totalArticleComments}
+        if(totalArticleComments===0){
+            return {comments: new Array(), total_count: totalArticleComments}
+        } 
+            
         const maxPages = Math.ceil(totalArticleComments / limit)
         if (page > maxPages) return Promise.reject({ status: 404, msg: 'Page Not Found.' })
         
-    })
-    .then(() => {
         queryValues.push(limit)
         query += ` LIMIT $${queryValues.length}`
         const offset = (page-1)*limit
