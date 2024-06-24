@@ -26,12 +26,7 @@ exports.getArticleCommentsById = (req, res, next) => {
     
     Promise.all(promises)
     .then((resolvedPromises)=>{
-        if(resolvedPromises[0].total_count===0){
-            res.status(200).send({comments:[],total_count:0})
-        }
-        else{
-            res.status(200).send(resolvedPromises[0])
-        }
+        res.status(200).send(resolvedPromises[0])
     })
     .catch(next)
 }
