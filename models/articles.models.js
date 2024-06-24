@@ -67,51 +67,29 @@ exports.fetchArticleCommentsById = ({article_id},{limit=10,p=1}) => {
         query += ` where articles.article_id=$${queryValues.length}`
     }
     query += ' order by comments.created_at desc'
-    console.log(query)
-    if(limit){
+
+    let totalArticleComments = 0
+    return db.query(`SELECT COUNT(*) AS total_count FROM (${query});`,queryValues)
+    .then(({rows})=>{
+        totalArticleComments = +(rows[0].total_count)
+        if(totalArticleComments===0) return []
+        const maxPages = Math.ceil(totalArticleComments / limit)
+        if (page > maxPages) return Promise.reject({ status: 404, msg: 'Page Not Found.' })
+        
+    })
+    .then(() => {
         queryValues.push(limit)
         query += ` LIMIT $${queryValues.length}`
-    }
-    const offset = (p-1)*limit
-    if(p){
+        const offset = (page-1)*limit
         queryValues.push(offset)
         query += ` OFFSET $${(queryValues.length)}`
-    }
-    query += ';'
-    return db.query(query,queryValues)
-    .then((results) => {
-        return (results.rows)
-    });
-//     return db.query(
-//         `select comments.*
-//         from articles
-//         join comments on comments.article_id = articles.article_id
-//         where articles.article_id=$1
-//         order by comments.created_at desc`,[article_id]
-//     )
-//     .then((results) => {
-//         return (results.rows)
-//     });
+        query += ';'
+        return db.query(query,queryValues)
+    })
+    .then(({rows})=>{
+        return {comments:rows,total_count:totalArticleComments}
+    })
 }
-// exports.fetchArticleCommentsById = async ({article_id},{limit=10,p=1}) => {
-//     const queryValues=[]
-//     limit=Number(limit)
-//     page=Number(p)
-//     let query = getArticleCommentsQuery(article_id,queryValues)
-
-//     return validLimit(limit)
-//     .then( ()=> validPage(page) )
-//     .then( ()=> getTotalCount(getTotalArticleCommentsSqlQuery(query),queryValues) )
-//     .then((totalComments) => {
-//         if(!(+totalComments)) return []
-//         return pageBeyondLimit(page,+totalComments,limit)        
-//     })
-//     .then(()=>{
-//         query += getLimitOffsetQuery(limit,page,queryValues)
-//         return db.query(query,queryValues)
-//     })
-//     .then( ({rows}) => rows );
-// }
 exports.insertArticleCommentById = (id,username,body) => {
     if(!id || !username || !body){
         return Promise.reject({ status:400, msg: "Missing Required Fields."})

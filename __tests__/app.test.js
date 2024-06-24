@@ -632,7 +632,7 @@ describe("/api/articles/:article_id/comments",()=>{
                 expect(body.msg).toBe("Invalid Limit.")
             })
         })
-        xtest("responds with status 404 and error msg Page Not Found if page requested exceeds the page limit",()=>{
+        test("responds with status 404 and error msg Page Not Found if page requested exceeds the page limit",()=>{
             return request(app)
             .get('/api/articles/1/comments?p=3')
             .expect(404)
