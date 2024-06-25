@@ -526,6 +526,7 @@ describe("/api/articles/:article_id/comments",()=>{
             .get('/api/articles/3/comments')
             .expect(200)
             .then(({body})=>{
+                console.log(body)
                 expect(body.comments).toHaveLength(2)
                 expect(body.comments).toBeSortedBy("created_at",{descending: true})
                 body.comments.map((comment)=>{

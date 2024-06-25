@@ -67,23 +67,48 @@ exports.fetchArticleCommentsById = ({article_id},{limit=10,p=1}) => {
         query += ` where articles.article_id=$${queryValues.length}`
     }
     query += ' order by comments.created_at desc'
+    queryValues.push(limit)
+    query += ` LIMIT $${queryValues.length}`
+    const offset = (p-1)*limit
+    queryValues.push(offset)
+    query += ` OFFSET $${(queryValues.length)}`
+    query += ';'
 
-    let totalArticleComments = 0
-    return db.query(`SELECT COUNT(*) AS total_count FROM (${query});`,queryValues)
-    .then(({rows})=>{
-        totalArticleComments = +(rows[0].total_count)
-        
-        queryValues.push(limit)
-        query += ` LIMIT $${queryValues.length}`
-        const offset = (page-1)*limit
-        queryValues.push(offset)
-        query += ` OFFSET $${(queryValues.length)}`
-        query += ';'
-        return db.query(query,queryValues)
+    return db.query(query,queryValues)
+    .then(({rows}) => {
+        return {comments:rows}
     })
-    .then(({rows})=>{
-        return {comments:rows,total_count:totalArticleComments}
-    })
+    // let query= `select comments.*
+    // from articles
+    // join comments on comments.article_id = articles.article_id`
+    // const queryValues=[]
+    // const page=Number(p)
+    // limit=Number(limit)
+
+    // if(limit<=0 || isNaN(limit)) return Promise.reject({ status: 400, msg: "Invalid Limit." })
+    // if(page<=0 || isNaN(page)) return Promise.reject({ status: 400, msg: "Invalid Page Number." })
+
+    // if(article_id){
+    //     queryValues.push(article_id)
+    //     query += ` where articles.article_id=$${queryValues.length}`
+    // }
+    // query += ' order by comments.created_at desc'
+
+    // let totalArticleComments = 0
+    // return db.query(`SELECT COUNT(*) AS total_count FROM (${query});`,queryValues)
+    // .then(({rows})=>{
+    //     totalArticleComments = +(rows[0].total_count)
+    //     queryValues.push(limit)
+    //     query += ` LIMIT $${queryValues.length}`
+    //     const offset = (page-1)*limit
+    //     queryValues.push(offset)
+    //     query += ` OFFSET $${(queryValues.length)}`
+    //     query += ';'
+    //     return db.query(query,queryValues)
+    // })
+    // .then(({rows})=>{
+    //     return {comments:rows,total_count:totalArticleComments}
+    // })
 }
 exports.insertArticleCommentById = (id,username,body) => {
     if(!id || !username || !body){
