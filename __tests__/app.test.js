@@ -526,7 +526,6 @@ describe("/api/articles/:article_id/comments",()=>{
             .get('/api/articles/3/comments')
             .expect(200)
             .then(({body})=>{
-                console.log(body)
                 expect(body.comments).toHaveLength(2)
                 expect(body.comments).toBeSortedBy("created_at",{descending: true})
                 body.comments.map((comment)=>{
@@ -631,6 +630,14 @@ describe("/api/articles/:article_id/comments",()=>{
             .expect(400)
             .then(({body})=>{
                 expect(body.msg).toBe("Invalid Limit.")
+            })
+        })
+        test("responds with status 404 and error msg Page Not Found if page requested exceeds the page limit",()=>{
+            return request(app)
+            .get('/api/articles/1/comments?p=3')
+            .expect(404)
+            .then(({body})=>{
+                expect(body.msg).toBe("Page Not Found.")
             })
         })
     })

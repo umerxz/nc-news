@@ -51,64 +51,39 @@ exports.checkArticleExists = ({article_id}) => {
         }
     })
 }
-exports.fetchArticleCommentsById = ({article_id},{limit=10,p=1}) => {
-    let query= `select comments.*
-    from articles
-    join comments on comments.article_id = articles.article_id`
-    const queryValues=[]
-    const page=Number(p)
-    limit=Number(limit)
+exports.fetchArticleCommentsById = ({ article_id }, { limit = 10, p = 1 }) => {
+    limit = Number(limit)
+    p = Number(p)
 
-    if(limit<=0 || isNaN(limit)) return Promise.reject({ status: 400, msg: "Invalid Limit." })
-    if(page<=0 || isNaN(page)) return Promise.reject({ status: 400, msg: "Invalid Page Number." })
-
-    if(article_id){
-        queryValues.push(article_id)
-        query += ` where articles.article_id=$${queryValues.length}`
+    if (limit <= 0 || isNaN(limit)) {
+        return Promise.reject({ status: 400, msg: "Invalid Limit." })
     }
-    query += ' order by comments.created_at desc'
-    queryValues.push(limit)
-    query += ` LIMIT $${queryValues.length}`
-    const offset = (p-1)*limit
-    queryValues.push(offset)
-    query += ` OFFSET $${(queryValues.length)}`
-    query += ';'
+    if (p <= 0 || isNaN(p)) {
+        return Promise.reject({ status: 400, msg: "Invalid Page Number." })
+    }
 
-    return db.query(query,queryValues)
-    .then(({rows}) => {
-        return {comments:rows}
+    const countQuery = 'SELECT COUNT(*) as total_count FROM comments WHERE article_id = $1'
+    return db.query(countQuery, [article_id])
+    .then(({ rows }) => {
+        const totalCount = parseInt(rows[0].total_count, 10)
+        const maxPages = Math.ceil(totalCount / limit)
+
+        if (totalCount === 0) {
+            return { comments: [], total_count: 0 }
+        }
+        
+        if (p > maxPages) {
+            return Promise.reject({ status: 404, msg: 'Page Not Found.' })
+        }
+
+        let query = `SELECT comments.* FROM comments WHERE article_id = $1
+                    ORDER BY comments.created_at DESC LIMIT $2 OFFSET $3`
+        const offset = (p - 1) * limit;
+        return db.query(query, [article_id, limit, offset])
+        .then(({ rows }) => {
+            return { comments: rows, total_count: totalCount }
+        })
     })
-    // let query= `select comments.*
-    // from articles
-    // join comments on comments.article_id = articles.article_id`
-    // const queryValues=[]
-    // const page=Number(p)
-    // limit=Number(limit)
-
-    // if(limit<=0 || isNaN(limit)) return Promise.reject({ status: 400, msg: "Invalid Limit." })
-    // if(page<=0 || isNaN(page)) return Promise.reject({ status: 400, msg: "Invalid Page Number." })
-
-    // if(article_id){
-    //     queryValues.push(article_id)
-    //     query += ` where articles.article_id=$${queryValues.length}`
-    // }
-    // query += ' order by comments.created_at desc'
-
-    // let totalArticleComments = 0
-    // return db.query(`SELECT COUNT(*) AS total_count FROM (${query});`,queryValues)
-    // .then(({rows})=>{
-    //     totalArticleComments = +(rows[0].total_count)
-    //     queryValues.push(limit)
-    //     query += ` LIMIT $${queryValues.length}`
-    //     const offset = (page-1)*limit
-    //     queryValues.push(offset)
-    //     query += ` OFFSET $${(queryValues.length)}`
-    //     query += ';'
-    //     return db.query(query,queryValues)
-    // })
-    // .then(({rows})=>{
-    //     return {comments:rows,total_count:totalArticleComments}
-    // })
 }
 exports.insertArticleCommentById = (id,username,body) => {
     if(!id || !username || !body){
