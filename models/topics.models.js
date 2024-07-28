@@ -14,7 +14,7 @@ exports.selectEndpoints = () => {
     })
 }
 exports.insertTopic = ({slug,description}) => {
-    if (!slug || !description) {
+    if (!slug) {
         return Promise.reject({ status: 400, msg: "Missing Information." });
     }
     if(!isNaN(Number(slug)) || !isNaN(Number(description))){
