@@ -17,8 +17,8 @@ exports.insertTopic = ({slug,description}) => {
     if (!slug) {
         return Promise.reject({ status: 400, msg: "Missing Information." });
     }
-    if(!isNaN(Number(slug)) || !isNaN(Number(description))){
-        return Promise.reject({ status:400, msg:"Bad Request"})
+    if(typeof slug === 'number' || typeof description === 'number'){
+        return Promise.reject({ status:400, msg:"Only Numbers not Allowed!"})
     }
     return db.query(
         format(

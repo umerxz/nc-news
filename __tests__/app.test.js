@@ -68,13 +68,13 @@ describe("/api/topics",()=>{
                 expect(response.body.msg).toBe('Missing Information.');
             });
         })
-        test('responds with status 400 and Bad Request error message when an wrong type is given', () => {
+        test('responds with status 400 and Only Numbers not Allowed! error message when an wrong type is given', () => {
             return request(app)
             .post('/api/topics')
             .send({ slug: 1231, description: 23 })
             .expect(400)
             .then((response) => {
-                expect(response.body.msg).toBe('Bad Request');
+                expect(response.body.msg).toBe('Only Numbers not Allowed!');
             });
         })
         test('responds with status 403 and Already Exists message when an existing ', () => {
