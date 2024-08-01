@@ -924,4 +924,53 @@ describe("/api/users/:username",()=>{
             })
         })
     })
+    describe("PATCH",()=>{
+        test("reponds with status 200 and the updated user",()=>{
+            const updatedUser = {
+                username: 'umer.xz',
+                name: 'Umer Naseer',
+                avatar_url:"https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-512.png"
+            }
+            return request(app)
+            .patch('/api/users/umer.xz')
+            .send(updatedUser)
+            .expect(200)
+            .then(({body})=>{
+                expect(body.user).toEqual({
+                    username: 'umer.xz',
+                    name: 'Umer Naseer',
+                    avatar_url:"https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-512.png"
+                })
+            })
+        })
+        test("reponds with status 404 when user not found",()=>{
+            const updatedUser = {
+                username: 'dontExist',
+                name: 'Umer Naseer',
+                avatar_url:"https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-512.png"
+            }
+            return request(app)
+            .patch('/api/users/dontExist')
+            .send(updatedUser)
+            .expect(404)
+            .then(({body})=>{
+                expect(body.msg).toEqual("User Not Found")
+            })
+        })
+    })
+    describe("DELETE",()=>{
+        test("responds with status 204 and sends an empty response back after deleting the user",()=>{
+            return request(app)
+            .delete('/api/users/umer.xz')
+            .expect(204)
+        })
+        test("responds with status 404 when user not found",()=>{
+            return request(app)
+            .delete('/api/users/abc')
+            .expect(404)
+            .then(({body})=>{
+                expect(body.msg).toEqual("User Not Found.")
+            })
+        })
+    })
 })

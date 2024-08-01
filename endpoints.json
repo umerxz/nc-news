@@ -179,5 +179,42 @@
         "avatar_url": "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png"
       }
     }
+  },
+  "POST /api/users/:username":{
+    "description": "serves with an object of new added user",
+    "queries": [],
+    "requestBody": {
+      "username":"lurker",
+      "name":"name",
+      "avatar_url":"https://url.com"
+    },
+    "exampleResponse":{
+      "user": {
+        "username":"lurker",
+        "name":"name",
+        "avatar_url":"https://url.com"
+      }
+    }
+  },
+  "PATCH /api/users/:username":{
+    "description": "serves with an object of updated user",
+    "queries": [],
+    "requestBody": {
+      "username":"lurker",
+      "name":"name",
+      "avatar_url":"https://url.com"
+    },
+    "exampleResponse":{
+      "user": {
+        "username":"lurker",
+        "name":"name",
+        "avatar_url":"https://url.com"
+      }
+    }
+  },
+  "DELETE /api/users/:username":{
+    "description": "serves with an empty response after deleting the user, user's comments and articles",
+    "queries": [],
+    "exampleResponse":{}
   }
 }

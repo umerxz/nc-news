@@ -31,3 +31,38 @@ exports.addUser = ({username,name,avatar_url}) => {
     }
     return Promise.reject({ status:400, msg:"Incorrect Username Format." })
 }
+exports.updateUser = ({username, name, avatar_url}) => {
+    return db.query(
+        `UPDATE users
+        SET name = $1, avatar_url = $2
+        WHERE username = $3
+        RETURNING *;`,
+        [name, avatar_url, username]
+    )
+    .then(({rows})=>{
+        if(!rows.length){
+            return Promise.reject({ status:404, msg:"User Not Found" })
+        }
+        return rows[0]
+    })
+}
+exports.removeUserComments = (username) => {
+    return db.query(`
+        DELETE FROM comments
+        WHERE author = $1;
+    `, [username]);
+};
+
+exports.removeUserArticles = (username) => {
+    return db.query(`
+        DELETE FROM articles
+        WHERE author = $1;
+    `, [username]);
+};
+
+exports.removeUser = (username) => {
+    return db.query(`
+        DELETE FROM users
+        WHERE username = $1;
+    `, [username]);
+};
