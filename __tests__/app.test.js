@@ -292,6 +292,14 @@ describe("/api/articles",()=>{
                 expect(body.msg).toBe("Page Not Found.")
             })
         })
+        test("responds with status 200 and list of articles of a user",()=>{
+            return request(app)
+            .get('/api/articles?author=butter_bridge&author=rogersop')
+            .expect(200)
+            .then(({body})=>{
+                console.log(body)
+            })
+        })
     })
     describe("POST",()=>{
         test("responds with status 201 and new posted article object with id, votes, comments, created_at and default img url if not passed",()=>{

@@ -1,20 +1,34 @@
 const db = require('../db/connection')
 
-exports.getArticlesFilterQuery = (topic,queryValues) => {
-    let query=''
-    if(topic) {
-        if(Array.isArray(topic)){
-            const parametrics = topic.map((topic, index) => `$${index + 1}`).join(', ');
-            queryValues.push(...topic)
-            query += ` WHERE topic in (${parametrics})`
-        }
-        else{
-            queryValues.push(topic)
-            query += ` WHERE topic = $${queryValues.length}`
+exports.getArticlesFilterQuery = (author, topic, queryValues) => {
+    let query = '';
+    if (topic) {
+        if (Array.isArray(topic)) {
+            const parametrics = topic.map((_, index) => `$${index + 1}`).join(', ');
+            queryValues.push(...topic);
+            query += ` WHERE topic IN (${parametrics})`;
+        } else {
+            queryValues.push(topic);
+            query += ` WHERE topic = $${queryValues.length}`;
         }
     }
-    return query
-}
+    if (author) {
+        if (query) {
+            query += ' AND';
+        } else {
+            query += ' WHERE';
+        }
+        if (Array.isArray(author)) {
+            const parametrics = author.map((_, index) => `$${queryValues.length + index + 1}`).join(', ');
+            queryValues.push(...author);
+            query += ` articles.author IN (${parametrics})`;
+        } else {
+            queryValues.push(author);
+            query += ` articles.author = $${queryValues.length}`;
+        }
+    }
+    return query;
+};
 exports.validSortOrder = (sort_by,order) => {
     return new Promise((resolve,reject)=>{
         const validSortBy = ['created_at',"author", "topic", "votes", "comment_count"]
@@ -42,9 +56,11 @@ exports.getTotalCount = (query,values) => {
     return db.query(query,values)
     .then( ({rows})=> rows[0].total_count )
 }
-exports.nonExistingArticlesTopic = (totalArticlesCount) => {
+exports.nonExistingArticlesTopic = ( author, topic, totalArticlesCount ) => {
     return new Promise((resolve,reject)=>{
-        if(totalArticlesCount===0) return reject({ status:404, msg: 'Article(s) with that Topic Not Found' })
+        if(totalArticlesCount===0 && author && !topic) return reject({ status:404, msg: 'User has no Articles!' })
+        if(totalArticlesCount===0 && topic && !author) return reject({ status:404, msg: 'Article(s) with that Topic Not Found' })
+        if(totalArticlesCount===0 && topic && author) return reject({ status:404, msg: 'Article(s) Not Found' })
         return resolve()
     })
 }

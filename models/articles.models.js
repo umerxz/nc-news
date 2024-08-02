@@ -17,9 +17,9 @@ exports.fetchArticleById = (id) =>{
         return result.rows[0]
     })
 }
-exports.fetchArticles = ({topic,sort_by='created_at',order='DESC',limit=10,p=1}) => {
+exports.fetchArticles = ({author,topic,sort_by='created_at',order='DESC',limit=10,p=1}) => {
     const queryValues=[]
-    const filterQuery = getArticlesFilterQuery(topic,queryValues)
+    const filterQuery = getArticlesFilterQuery(author,topic,queryValues)
     let totalArticlesCount
     limit=Number(limit)
     page=Number(p)
@@ -29,18 +29,20 @@ exports.fetchArticles = ({topic,sort_by='created_at',order='DESC',limit=10,p=1})
     .then( (page)=> getTotalCount(getTotalArticlesSqlQuery(filterQuery),queryValues) )
     .then( (totalArticles)=>{
         totalArticlesCount= +totalArticles
-        return nonExistingArticlesTopic(totalArticlesCount)
+        return nonExistingArticlesTopic(author,topic,totalArticlesCount)
     })
     .then(()=>{
         return pageBeyondLimit(page,totalArticlesCount,limit)
     })
-    .then(()=>{
-        const limitOffsetQuery = getLimitOffsetQuery(limit,page,queryValues)
-        const query = getArticlesSqlQuery(filterQuery,sort_by,order,limitOffsetQuery)
-        return db.query(query,queryValues)
+    .then(() => {
+        const limitOffsetQuery = getLimitOffsetQuery(limit, page, queryValues);
+        const query = getArticlesSqlQuery(filterQuery, sort_by, order, limitOffsetQuery);
+        console.log('Query:', query);
+        console.log('Query Values:', queryValues);
+        return db.query(query, queryValues);
     })
-    .then((results)=> { 
-        return { articles: results.rows, total_count: totalArticlesCount }
+    .then((results) => {
+        return { articles: results.rows, total_count: totalArticlesCount };
     })
 }
 exports.checkArticleExists = ({article_id}) => {
