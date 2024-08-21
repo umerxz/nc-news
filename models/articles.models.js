@@ -37,8 +37,6 @@ exports.fetchArticles = ({author,topic,sort_by='created_at',order='DESC',limit=1
     .then(() => {
         const limitOffsetQuery = getLimitOffsetQuery(limit, page, queryValues);
         const query = getArticlesSqlQuery(filterQuery, sort_by, order, limitOffsetQuery);
-        console.log('Query:', query);
-        console.log('Query Values:', queryValues);
         return db.query(query, queryValues);
     })
     .then((results) => {

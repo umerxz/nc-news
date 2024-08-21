@@ -297,7 +297,7 @@ describe("/api/articles",()=>{
             .get('/api/articles?author=butter_bridge&author=rogersop')
             .expect(200)
             .then(({body})=>{
-                console.log(body)
+                expect(body.total_count).toBe(7)
             })
         })
     })
@@ -757,6 +757,22 @@ describe("/api/comments/:comment_id",()=>{
                 })
             })
         })
+        test("responds with status 200 and an update comment object with the updated comment",()=>{
+            return request(app)
+            .patch('/api/comments/5')
+            .send({ body : 'I love streaming noses' })
+            .expect(200)
+            .then(({body})=>{
+                expect(body.comment).toEqual({
+                    body: "I love streaming noses",
+                    votes: 1,
+                    author: "icellusedkars",
+                    article_id: 1,
+                    created_at: '2020-11-03T21:00:00.000Z',
+                    comment_id: 5
+                })
+            })
+        })
         test("responds with status 200 and an update comment object with votes decreased by 1",()=>{
             return request(app)
             .patch('/api/comments/5')
@@ -764,7 +780,7 @@ describe("/api/comments/:comment_id",()=>{
             .expect(200)
             .then(({body})=>{
                 expect(body.comment).toEqual({
-                    body: "I hate streaming noses",
+                    body: "I love streaming noses",
                     votes: 0,
                     author: "icellusedkars",
                     article_id: 1,
